@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 // 0x3e67aF60f168B9B2adaDb57164d6726764ffaF0A
 
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 pragma solidity ^0.8.0;
-
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-
-import "../libs/IERC20.sol";
-import "../libs/ERC20.sol";
 
 // PreDarkside
 contract PreDarkside is ERC20("PDARKCOIN", "PDARK") {

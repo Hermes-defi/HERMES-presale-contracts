@@ -2,12 +2,9 @@
 
 // 0xde4c826179aeA9DE46a7ed0E103848FA7373ca45
 
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 pragma solidity ^0.8.0;
-
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-
-import "../libs/IERC20.sol";
-import "../libs/ERC20.sol";
 
 // PreCZDiamond
 contract PreCZDiamond is ERC20("PCZDIAMOND", "PCZDIAMOND") {
