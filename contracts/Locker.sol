@@ -2,7 +2,7 @@
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 pragma solidity ^0.8.0;
 
 // The locker stores IERC20 tokens and only allows the owner to withdraw them after the UNLOCK_BLOCKNUMBER has been reached.

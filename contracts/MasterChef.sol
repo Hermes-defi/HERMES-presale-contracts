@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./NFTChef.sol";
 import "./library/DarksideToolBox.sol";
+import "./library/interfaces/IDarksideReferral.sol";
+
 import "./token/DarksideToken.sol";
 import "./token/CZDiamondToken.sol";
 
@@ -17,7 +19,7 @@ pragma solidity ^0.8.0;
 // will be transferred to a governance smart contract once DARKSIDE is sufficiently
 // distributed and the community can show to govern itself.
 //
-// Have fun reading it. Hopefully it's bug-free. .
+// Have fun reading it. Hopefully it's bug-free.
 contract MasterChef is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 

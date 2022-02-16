@@ -1,14 +1,13 @@
-// SPDX-Licence-Identifier: MIT
+// SPDX-License-Identifier: GPL-3.0
 
-
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "../library/DarksideToolBox.sol";
-
 
 pragma solidity ^0.8.0;
 
 // CZDiamondToken
-contract CZDiamondToken is ERC20("CZDiamond", "CZDIAMOND") {
+contract CZDiamondToken is Ownable, ERC20("CZDiamond", "CZDIAMOND") {
     // Burn address
     address public constant BURN_ADDRESS =
         0x000000000000000000000000000000000000dEaD;

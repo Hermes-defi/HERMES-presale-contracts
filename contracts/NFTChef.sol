@@ -12,7 +12,7 @@ pragma solidity ^0.8.0;
 // NFTChef is the keeper of Masterchefs NFTs.
 //
 //
-// Have fun reading it. Hopefully it's bug-free. .
+// Have fun reading it. Hopefully it's bug-free.
 contract NFTChef is IERC721Receiver, Ownable {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeERC20 for IERC20;

@@ -1,18 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 
-
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-
-import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
-
 import "../library/AddLiquidityHelper.sol";
 import "../library/DarksideToolBox.sol";
+
+import "../library/interfaces/IWETH.sol";
 
 pragma solidity ^0.8.0;
 
 // DarksideToken.
-contract DarksideToken is ERC20("Darkcoin", "DARK") {
+contract DarksideToken is Ownable, ERC20("Darkcoin", "DARK") {
     using SafeERC20 for IERC20;
 
     // Transfer tax rate in basis points. (default 6.66%)
