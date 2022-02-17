@@ -7,12 +7,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-/**
- * @title a contract that swaps arc token for PreDarkside and PreCZDiamond tokens.
- * @dev this contract should have l3 presale balance to work properly.
- * @dev preCZDiamond balance should at least be equal [preCZDiamondMaximumAvailable].
- * @dev preDarkside balance should at least be equal [preDarksideMaximumAvailable].
-  */
+/// @title Contract that swaps arc token for PreDarkside and PreCZDiamond tokens.
+/// @dev This contract should have l3 presale balance to work properly.
+/// @dev PreCZDiamond balance should at least be equal [preCZDiamondMaximumAvailable].
+/// @dev PreDarkside balance should at least be equal [preDarksideMaximumAvailable].
+/// @dev Any remaining presale tokens stay in this contract after pre-sale ends.
+/// @custom:note Only ~42.9% of minted L3presale tokens were sent to this contract.
+/// The rest is sent to the other swap contract
 contract L3ArcSwap is Ownable, ReentrancyGuard {
     address public constant feeAddress =
         0x3a1D1114269d7a786C154FE5278bF5b1e3e20d31;
@@ -24,11 +25,11 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
 
     uint256 public constant arcSwapPresaleSize = 834686 * (10**18); // XXX amount of ARC expected to be swapped?
 
-    uint256 public preCZDiamondSaleINVPriceE35 = 1543664 * (10**27); // this "inventory" price stays fixed during the sale.
-    uint256 public preDarksideSaleINVPriceE35 = 12863864 * (10**27); // this "inventory" price stays fixed during the sale.
+    uint256 public preCZDiamondSaleINVPriceE35 = 1543664 * (10**27); // this inventory price (PCZDiamond/ARC) stays fixed during the sale.
+    uint256 public preDarksideSaleINVPriceE35 = 12863864 * (10**27); // this inventory price (PDARK/ARC) stays fixed during the sale.
 
     uint256 public preCZDiamondMaximumAvailable =
-        (arcSwapPresaleSize * preCZDiamondSaleINVPriceE35) / 1e35; // max amount of presale CZDiaomn tokens available to swap
+        (arcSwapPresaleSize * preCZDiamondSaleINVPriceE35) / 1e35; // max amount of presale CZDiamond tokens available to swap
     uint256 public preDarksideMaximumAvailable =
         (arcSwapPresaleSize * preDarksideSaleINVPriceE35) / 1e35; // max amount of presale Dakside tokens available to swap
 
@@ -89,9 +90,8 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
     }
 
     /// @notice swap l2 token for l3 presale token.
-    /// @dev allows minimum of 1e6 token to be swapped.
-    /// @dev requires l2 token approval.
-
+    /// @dev Allows minimum of 1e6 token to be swapped.
+    /// Requires l2 token approval.
     function swapArcForPresaleTokensL3(uint256 arcadiumToSwap)
         external
         nonReentrant
@@ -196,8 +196,8 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
         );
     }
 
-    /// @notice send any arc swapped win this contract back to the fee address.
-    /// @dev can only be used once sale has ended.
+    /// @notice Sends any ARC swapped with this contract back to the fee address.
+    /// @dev Can only be used once sale has ended.
     function sendDepreciatedArcToFeeAddress() external onlyOwner {
         require(
             block.number > endBlock,
@@ -215,9 +215,9 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
     }
 
     /// @notice Sets the sale prices of PreCZDiamond & PreDarkside tokens.
+    /// @dev Prices can only be changed up to 4 hrs efore start time.
     /// @param _newPreCZDiamondSaleINVPriceE35 new PreCZDiamond price.
     /// @param _newPreDarksideSaleINVPriceE35 new PreDarkside price.
-    /// @dev prices can only be changed up to 4 hrs efore start time.
     function setSaleINVPriceE35(
         uint256 _newPreCZDiamondSaleINVPriceE35,
         uint256 _newPreDarksideSaleINVPriceE35
@@ -233,7 +233,7 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
         require(
             _newPreCZDiamondSaleINVPriceE35 <= 1 * (10**34),
             "new CZD price is too low!"
-        );
+        ); //TODO: create test with price at max. This seems like swapping the total arcadia would require more than the total supply of PCZDiamond.
 
         require(
             _newPreDarksideSaleINVPriceE35 >= 9 * (10**32),
@@ -263,8 +263,8 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
         );
     }
 
-    /// @notice set the start block to begin trading.
-    /// @dev can only change start block if sale has not yet started.
+    /// @notice Set the start block to begin trading.
+    /// @dev Can only change start block if sale has not yet started.
     /// @param _newStartBlock new block number when sale should begin.
     function setStartBlock(uint256 _newStartBlock) external onlyOwner {
         require(
