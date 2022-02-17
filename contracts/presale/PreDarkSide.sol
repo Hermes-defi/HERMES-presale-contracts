@@ -5,7 +5,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 pragma solidity ^0.8.0;
 
-// PreDarkside
+/// @title the Darkside presale token.
+/// @notice this contract is a standard ERC20, and mints all tokens to a specific address.
+/// @dev the address minted to is the same as the fee adddress for the L3ArcSwap contract.
 contract PreDarkside is ERC20("PDARKCOIN", "PDARK") {
     constructor() {
         _mint(

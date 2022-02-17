@@ -7,6 +7,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+/**
+ * @title a contract that swaps arc token for PreDarkside and PreCZDiamond tokens.
+ * @dev this contract should have l3 presale balance to work properly.
+ * @dev preCZDiamond balance should at least be equal [preCZDiamondMaximumAvailable].
+ * @dev preDarkside balance should at least be equal [preDarksideMaximumAvailable].
+  */
 contract L3ArcSwap is Ownable, ReentrancyGuard {
     address public constant feeAddress =
         0x3a1D1114269d7a786C154FE5278bF5b1e3e20d31;
@@ -16,22 +22,22 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
     address public immutable preCZDiamondAddress;
     address public immutable preDarksideAddress;
 
-    uint256 public constant arcSwapPresaleSize = 834686 * (10**18);
+    uint256 public constant arcSwapPresaleSize = 834686 * (10**18); // XXX amount of ARC expected to be swapped?
 
-    uint256 public preCZDiamondSaleINVPriceE35 = 1543664 * (10**27);
-    uint256 public preDarksideSaleINVPriceE35 = 12863864 * (10**27);
+    uint256 public preCZDiamondSaleINVPriceE35 = 1543664 * (10**27); // this "inventory" price stays fixed during the sale.
+    uint256 public preDarksideSaleINVPriceE35 = 12863864 * (10**27); // this "inventory" price stays fixed during the sale.
 
     uint256 public preCZDiamondMaximumAvailable =
-        (arcSwapPresaleSize * preCZDiamondSaleINVPriceE35) / 1e35;
+        (arcSwapPresaleSize * preCZDiamondSaleINVPriceE35) / 1e35; // max amount of presale CZDiaomn tokens available to swap
     uint256 public preDarksideMaximumAvailable =
-        (arcSwapPresaleSize * preDarksideSaleINVPriceE35) / 1e35;
+        (arcSwapPresaleSize * preDarksideSaleINVPriceE35) / 1e35; // max amount of presale Dakside tokens available to swap
 
     // We use a counter to defend against people sending pre{CZDiamond,Darkside} back
     uint256 public preCZDiamondRemaining = preCZDiamondMaximumAvailable;
     uint256 public preDarksideRemaining = preDarksideMaximumAvailable;
 
-    uint256 public constant oneHourMatic = 1500;
-    uint256 public constant presaleDuration = 71999;
+    uint256 public constant oneHourMatic = 1500; // blocks per hour
+    uint256 public constant presaleDuration = 71999; // blocks
 
     uint256 public startBlock;
     uint256 public endBlock = startBlock + presaleDuration;
@@ -82,6 +88,10 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
         preDarksideAddress = _preDarksideAddress;
     }
 
+    /// @notice swap l2 token for l3 presale token.
+    /// @dev allows minimum of 1e6 token to be swapped.
+    /// @dev requires l2 token approval.
+
     function swapArcForPresaleTokensL3(uint256 arcadiumToSwap)
         external
         nonReentrant
@@ -101,16 +111,16 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
         require(
             preCZDiamondRemaining > 0 && preDarksideRemaining > 0,
             "No more presale tokens remaining! Come back next time!"
-        );
+        ); // check if any presale tokens remains
         require(
             IERC20(preCZDiamondAddress).balanceOf(address(this)) > 0,
             "No more PreCZDiamond left! Come back next time!"
-        );
+        ); // check if cotract has presale tokens to give
         require(
             IERC20(preDarksideAddress).balanceOf(address(this)) > 0,
             "No more PreDarkside left! Come back next time!"
-        );
-        require(arcadiumToSwap > 1e6, "not enough arcadium provided");
+        ); // check if cotract has presale tokens to give
+        require(arcadiumToSwap > 1e6, "not enough arcadium provided"); // requires a minimum arc token to swap
 
         uint256 originalPreCZDiamondAmount = (arcadiumToSwap *
             preCZDiamondSaleINVPriceE35) / 1e35;
@@ -166,7 +176,7 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
 
         preCZDiamondRemaining =
             preCZDiamondRemaining -
-            preCZDiamondPurchaseAmount;
+            preCZDiamondPurchaseAmount; // set the remainning amount
         preDarksideRemaining = preDarksideRemaining - preDarksidePurchaseAmount;
 
         require(
@@ -186,6 +196,8 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
         );
     }
 
+    /// @notice send any arc swapped win this contract back to the fee address.
+    /// @dev can only be used once sale has ended.
     function sendDepreciatedArcToFeeAddress() external onlyOwner {
         require(
             block.number > endBlock,
@@ -202,6 +214,10 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
         emit RetrieveDepreciatedArcTokens(feeAddress, arcadiumInContract);
     }
 
+    /// @notice Sets the sale prices of PreCZDiamond & PreDarkside tokens.
+    /// @param _newPreCZDiamondSaleINVPriceE35 new PreCZDiamond price.
+    /// @param _newPreDarksideSaleINVPriceE35 new PreDarkside price.
+    /// @dev prices can only be changed up to 4 hrs efore start time.
     function setSaleINVPriceE35(
         uint256 _newPreCZDiamondSaleINVPriceE35,
         uint256 _newPreDarksideSaleINVPriceE35
@@ -247,6 +263,9 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
         );
     }
 
+    /// @notice set the start block to begin trading.
+    /// @dev can only change start block if sale has not yet started.
+    /// @param _newStartBlock new block number when sale should begin.
     function setStartBlock(uint256 _newStartBlock) external onlyOwner {
         require(
             block.number < startBlock,
