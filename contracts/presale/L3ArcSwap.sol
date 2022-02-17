@@ -92,6 +92,7 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
     /// @notice swap l2 token for l3 presale token.
     /// @dev Allows minimum of 1e6 token to be swapped.
     /// Requires l2 token approval.
+    /// @param arcadiumToSwap Amount of ARC token to swap.
     function swapArcForPresaleTokensL3(uint256 arcadiumToSwap)
         external
         nonReentrant

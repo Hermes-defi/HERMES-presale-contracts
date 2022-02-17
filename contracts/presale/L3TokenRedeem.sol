@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 
+pragma solidity ^0.8.0;
 // 0x7ffA1Ccdc9fE9C0Ebcb8E4CE1c8ccc5D6f15418A
 
 import "../presale/L3ArcSwap.sol";
 import "../presale/L3MFSwap.sol";
 
-pragma solidity ^0.8.0;
-
+/// @title Contract that swaps {PreCZDiamond; PreDarkside} for {CZDiamond; Darkside}.
+/// @dev This contract should have {CZDiamond; Darkside} balance to work properly
+/// @custom:note Total pre-minted L3 tokens are sent to this contract before start.
 contract L3TokenRedeem is Ownable, ReentrancyGuard {
     address public constant BURN_ADDRESS =
         0x000000000000000000000000000000000000dEaD;
@@ -76,6 +78,9 @@ contract L3TokenRedeem is Ownable, ReentrancyGuard {
         darksideAddress = _darksideAddress;
     }
 
+    /// @notice swaps PreCZDiamond token for CZDiamond token at 1:1 ratio.
+    /// @param CZDiamondSwapAmount amount of pre-sale tokens to swap for L3 token.
+    /// @dev the pre-sale token is sent to dead address.
     function swapPreCZDiamondForCZDiamond(uint256 CZDiamondSwapAmount)
         external
         nonReentrant
@@ -100,6 +105,9 @@ contract L3TokenRedeem is Ownable, ReentrancyGuard {
         emit CZDiamondSwap(msg.sender, CZDiamondSwapAmount);
     }
 
+    /// @notice swaps PreDarkside token for Darkside token at 1:1 ratio.
+    /// @param darksideSwapAmount amount of pre-sale tokens to swap for L3 token.
+    /// @dev the pre-sale token is sent to dead address.
     function swapPreDarksideForDarkside(uint256 darksideSwapAmount)
         external
         nonReentrant
@@ -124,6 +132,9 @@ contract L3TokenRedeem is Ownable, ReentrancyGuard {
         emit DarksideSwap(msg.sender, darksideSwapAmount);
     }
 
+    /// @notice Sends any remaining L3 tokens to the fee address.
+    /// @dev This can only be called once L3 token presale has ended
+    /// @dev This can only be called once.
     function sendUnclaimedsToFeeAddress() external onlyOwner {
         require(
             block.number > l3ArcSwap.endBlock(),
@@ -175,6 +186,9 @@ contract L3TokenRedeem is Ownable, ReentrancyGuard {
         );
     }
 
+    /// @notice set the start block to begin trading.
+    /// @dev can only change start block if sale has not yet started.
+    /// @param _newStartBlock new block number when sale should begin.
     function setStartBlock(uint256 _newStartBlock) external onlyOwner {
         require(
             block.number < startBlock,
