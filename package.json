@@ -6,6 +6,7 @@
   "scripts": {
     "start": "ganache-cli --fork https://a.api.s0.t.hmny.io",
     "test:hermes": "hardhat test test/hermes.js --network localhost",
+    "test:l3ArcSwap": "hardhat test test/l3ArcSwap.js",
     "compile": "hardhat compile",
     "deploy-mainnet": "truffle migrate --reset --network harmony",
     "deploy-testnet": "truffle migrate --reset --network harmonyTestnet"

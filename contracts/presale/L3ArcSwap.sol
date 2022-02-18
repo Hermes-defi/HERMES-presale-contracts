@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
+// import "hardhat/console.sol";
+
 /// @title Contract that swaps arc token for PreDarkside and PreCZDiamond tokens.
 /// @dev This contract should have l3 presale balance to work properly.
 /// @dev PreCZDiamond balance should at least be equal [preCZDiamondMaximumAvailable].
@@ -18,8 +20,7 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
     address public constant feeAddress =
         0x3a1D1114269d7a786C154FE5278bF5b1e3e20d31;
 
-    address public constant arcadiumAddress =
-        0x3F374ed3C8e61A0d250f275609be2219005c021e;
+    address public arcadiumAddress = 0x3F374ed3C8e61A0d250f275609be2219005c021e;
     address public immutable preCZDiamondAddress;
     address public immutable preDarksideAddress;
 
@@ -58,6 +59,7 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
 
     constructor(
         uint256 _startBlock,
+        address _arcadiumAddress,
         address _preCZDiamondAddress,
         address _preDarksideAddress
     ) {
@@ -87,6 +89,7 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
 
         preCZDiamondAddress = _preCZDiamondAddress;
         preDarksideAddress = _preDarksideAddress;
+        arcadiumAddress = _arcadiumAddress;
     }
 
     /// @notice swap l2 token for l3 presale token.
