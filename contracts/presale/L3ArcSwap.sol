@@ -237,7 +237,7 @@ contract L3ArcSwap is Ownable, ReentrancyGuard {
         require(
             _newPreCZDiamondSaleINVPriceE35 <= 1 * (10**34),
             "new CZD price is too low!"
-        ); //TODO: create test with price at max. This seems like swapping the total arcadia would require more than the total supply of PCZDiamond.
+        );
 
         require(
             _newPreDarksideSaleINVPriceE35 >= 9 * (10**32),
