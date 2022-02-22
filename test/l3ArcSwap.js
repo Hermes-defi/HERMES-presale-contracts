@@ -6,9 +6,9 @@ describe('L3ArcSwap Contract Test', function () {
     let deployer, alice, bob, charlie, david, attacker;
     let users;
 
-    const ARCADIA_SUPPLY = ethers.utils.parseEther('834686'); // 1 million tokens
-    const PDIAMOND_SUPPLY = ethers.utils.parseEther('12885'); // 1 million tokens
-    const PDARKSIDE_SUPPLY = ethers.utils.parseEther('107375'); // 1 million tokens
+    const ARCADIA_SUPPLY = ethers.utils.parseEther('834686'); // 834k tokens
+    const PDIAMOND_SUPPLY = ethers.utils.parseEther('12885'); // 12k tokens
+    const PDARKSIDE_SUPPLY = ethers.utils.parseEther('107375'); // 107k tokens
 
     const PRESALE_START_BLOCK = 7000;
     const PRESALE_END_BLOCK = PRESALE_START_BLOCK + 71999;
@@ -50,7 +50,6 @@ describe('L3ArcSwap Contract Test', function () {
         ).to.be.eq(PDARKSIDE_SUPPLY);
     });
 
-    // it("", async function () { });
     it("Should revert because presale did not start.", async function () {
         const amount = ethers.utils.parseEther('1000');
         await expect(this.l3ArcSwap.connect(alice).swapArcForPresaleTokensL3(amount)).to.be.revertedWith("presale hasn't started yet, good things come to those that wait");
@@ -109,6 +108,9 @@ describe('L3ArcSwap Contract Test', function () {
 
     it("Should revert when trying to change sale price within hours of presale", async function () {
         // increase block to have at least 1 hour time efore presale
+        const pDiaPrice = ethers.utils.parseEther('100000000000000');
+        const pDarkPrice = ethers.utils.parseEther('900000000000000');
+
         const currentBlock = await ethers.provider.getBlockNumber();
 
         const increment = PRESALE_START_BLOCK - currentBlock - 10;
@@ -116,6 +118,7 @@ describe('L3ArcSwap Contract Test', function () {
         for (let i = 0; i < increment; i++) {
             await ethers.provider.send("evm_mine");
         }
+        await expect(this.l3ArcSwap.setSaleINVPriceE35(pDiaPrice, pDarkPrice)).to.be.revertedWith("cannot change price 4 hours before start block");
     });
 
     it("All user should receive the same amount of pTokens after swapping", async function () {
