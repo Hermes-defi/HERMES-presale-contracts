@@ -6,6 +6,8 @@
   "scripts": {
     "start": "ganache-cli --fork https://a.api.s0.t.hmny.io",
     "test:hermes": "hardhat test test/hermes.js --network localhost",
+    "test:l3ArcSwap": "hardhat test test/l3ArcSwap.js",
+    "test:l3TokenRedeem": "hardhat test test/l3TokenRedeem.js",
     "compile": "hardhat compile",
     "deploy-mainnet": "truffle migrate --reset --network harmony",
     "deploy-testnet": "truffle migrate --reset --network harmonyTestnet"
@@ -33,6 +35,8 @@
     "solidity-coverage": "^0.7.16"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.5.0"
+    "@openzeppelin/contracts": "^4.5.0",
+    "@uniswap/v2-core": "^1.0.1",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0"
   }
 }
