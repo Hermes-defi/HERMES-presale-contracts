@@ -54,7 +54,7 @@ describe('L3BankPlutusSwap Contract Test', function () {
 
     it("Max pHermes Should increase after changing the sale price (pl3/l2) to the Min", async function () {
 
-        const pHermesPrice = ethers.utils.parseEther('90000000000000000');
+        const pHermesPrice = ethers.utils.parseEther('211000000000000000');
 
         // get curent max available
 
@@ -80,7 +80,7 @@ describe('L3BankPlutusSwap Contract Test', function () {
 
     it("Max pHermes Should decrease after changing the sale price (pl3/l2) to the max", async function () {
 
-        const pHermesPrice = ethers.utils.parseEther('900000000000000');
+        const pHermesPrice = ethers.utils.parseEther('145000000000000000');
 
         // get curent max available
 
