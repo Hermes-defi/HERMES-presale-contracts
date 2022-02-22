@@ -7,7 +7,7 @@ import "../presale_hermes/L3PltsSwap.sol";
 /// @title Contract that swaps { PreHermes} for { Hermes}.
 /// @dev This contract should have { Hermes} balance to work properly
 /// @custom:note Total pre-minted L3 tokens are sent to this contract before start.
-contract L3TokenRedeem is Ownable, ReentrancyGuard {
+contract L3HermesTokenRedeem is Ownable, ReentrancyGuard {
     address public constant BURN_ADDRESS =
         0x000000000000000000000000000000000000dEaD;
 
