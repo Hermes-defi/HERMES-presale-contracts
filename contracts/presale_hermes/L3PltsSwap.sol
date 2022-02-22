@@ -18,7 +18,7 @@ contract L3PltsSwap is Ownable, ReentrancyGuard {
     address public constant FEE_ADDRESS =
         0x1109c5BB8Abb99Ca3BBeff6E60F5d3794f4e0473;
 
-    address public plutusAddress = 0xd32858211fcefd0be0dd3fd6d069c3e821e0aef3;
+    address public immutable plutusAddress;
 
     address public immutable preHermesAddress;
 
@@ -61,13 +61,17 @@ contract L3PltsSwap is Ownable, ReentrancyGuard {
             "cannot set start block in the past!"
         );
         require(
-            plutusAddress != _preHermesAddress,
+            _plutusAddress != _preHermesAddress,
             "plutusAddress cannot be equal to preHermes"
         );
 
         require(
             _preHermesAddress != address(0),
             "_preHermesAddress cannot be the zero address"
+        );
+        require(
+            _plutusAddress != address(0),
+            "_plutusAddress cannot be the zero address"
         );
 
         startBlock = _startBlock;
