@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 
-contract Hermes is Ownable, ERC20Capped {
+contract OLDHermes is Ownable, ERC20Capped {
     IERC20 public plutusToken;
     address public constant BURNADDRESS =
         0x000000000000000000000000000000000000dEaD;
