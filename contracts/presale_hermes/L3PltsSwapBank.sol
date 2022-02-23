@@ -6,15 +6,10 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-// import "hardhat/console.sol";
-//TODO: whitelist users.
-
 /// @title Contract that swaps plutus token for PreHermes tokens.
 /// @dev This contract should have l3 presale balance to work properly.
-/// @dev PreHermes balance should at least be equal [preHermesMaximumAvailable].
-/// @dev Any remaining presale tokens stay in this contract after pre-sale ends.
-/// @custom:note Only ~42.9% of minted L3presale tokens were sent to this contract.
-/// The rest is sent to the other swap contract
+/// PreHermes balance should at least be equal [preHermesMaximumAvailable].
+/// Any remaining presale tokens stays in this contract after pre-sale ends.
 contract L3PltsSwapBank is Ownable, ReentrancyGuard {
     address public constant FEE_ADDRESS =
         0x1109c5BB8Abb99Ca3BBeff6E60F5d3794f4e0473;
@@ -23,23 +18,21 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
 
     address public immutable preHermesAddress;
 
-    uint256 public constant pltsSwapPresaleSize = 7142857143 * (10**14); // 714,285.7143 amount of PLTS expected to be swapped?
+    uint256 public constant PLTS_SWAP_PRESALE_SIZE = 7142857143 * (10**14); // 714,285.7143 amount of PLTS expected to be swapped?
 
     uint256 public preHermesSaleINVPriceE35 = 1486595745 * (10**26); // this price (pHRMS/PLTS) stays fixed during the sale.
-    // uint256 public preHermesSaleINVPriceE35 = 4585152838 * (10**25); // this price (pHRMS/PLTS) stays fixed during the sale.
 
     uint256 public preHermesMaximumAvailable =
-        (pltsSwapPresaleSize * preHermesSaleINVPriceE35) / 1e35; // max amount of presale Dakside tokens available to swap
+        (PLTS_SWAP_PRESALE_SIZE * preHermesSaleINVPriceE35) / 1e35; // max amount of presale Dakside tokens available to swap
 
     // We use a counter to defend against people sending pre{Hermes} back
-
     uint256 public preHermesRemaining = preHermesMaximumAvailable;
 
-    uint256 public constant oneHourMatic = 1500; // blocks per hour
-    uint256 public constant presaleDuration = 71999; // blocks
+    uint256 public constant ONE_HOUR_HARMONY = 1630; // blocks per hour
+    uint256 public constant PRESALE_DURATION = 117360; // blocks
 
     uint256 public startBlock;
-    uint256 public endBlock = startBlock + presaleDuration;
+    uint256 public endBlock = startBlock + PRESALE_DURATION;
 
     mapping(address => bool) public whitelisted;
 
@@ -57,7 +50,7 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
 
     constructor(
         uint256 _startBlock,
-        address _plutusAddress, //TODO: remove from constructor and make constant
+        address _plutusAddress,
         address _preHermesAddress
     ) {
         require(
@@ -79,7 +72,7 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
         );
 
         startBlock = _startBlock;
-        endBlock = _startBlock + presaleDuration;
+        endBlock = _startBlock + PRESALE_DURATION;
 
         preHermesAddress = _preHermesAddress;
         plutusAddress = _plutusAddress;
@@ -199,7 +192,7 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
         onlyOwner
     {
         require(
-            block.number < startBlock - (oneHourMatic * 4),
+            block.number < startBlock - (ONE_HOUR_HARMONY * 4),
             "cannot change price 4 hours before start block"
         );
 
@@ -215,7 +208,7 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
         preHermesSaleINVPriceE35 = _newPreHermesSaleINVPriceE35;
 
         preHermesMaximumAvailable =
-            (pltsSwapPresaleSize * preHermesSaleINVPriceE35) /
+            (PLTS_SWAP_PRESALE_SIZE * preHermesSaleINVPriceE35) /
             1e35;
 
         preHermesRemaining = preHermesMaximumAvailable;
@@ -236,7 +229,7 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
             "cannot set start block in the past"
         );
         startBlock = _newStartBlock;
-        endBlock = _newStartBlock + presaleDuration;
+        endBlock = _newStartBlock + PRESALE_DURATION;
 
         emit StartBlockChanged(_newStartBlock, endBlock);
     }
