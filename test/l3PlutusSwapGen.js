@@ -1,23 +1,23 @@
 const { ethers } = require('hardhat');
 const { expect, assert } = require('chai');
 
-describe('L3BankPlutusSwap Contract Test', function () {
+describe('L3PlutusSwapGen Contract Test', function () {
     this.timeout(0); // this is important to prevent timeout when increasing blocks.
     let deployer, alice, bob, charlie, david, attacker;
     let users;
 
-    const PLUTUS_SUPPLY = ethers.utils.parseEther('714285.7143'); // ~700k tokens
-    const PHERMES_SUPPLY = ethers.utils.parseEther('1811855'); // ~1M tokens
+    const PLUTUS_SUPPLY = ethers.utils.parseEther('1635714.2863'); // ~1.6Mk tokens
+    const PHERMES_SUPPLY = ethers.utils.parseEther('750000'); // ~750k tokens
 
 
     const PRESALE_START_BLOCK = 7000;
-    const PRESALE_END_BLOCK = PRESALE_START_BLOCK + 71999;
+    const PRESALE_END_BLOCK = PRESALE_START_BLOCK + 117360;
     before(async function () {
 
         [deployer, alice, bob, charlie, david, attacker] = await ethers.getSigners();
         users = [alice, bob, charlie, david];
 
-        const L3PlutusSwapFactory = await ethers.getContractFactory('L3PltsSwap', deployer);
+        const L3PlutusSwapFactory = await ethers.getContractFactory('L3PltsSwapGen', deployer);
         const ERC20Factory = await ethers.getContractFactory('MockERC20', deployer);
 
         // deploy contracts
@@ -38,9 +38,7 @@ describe('L3BankPlutusSwap Contract Test', function () {
             ).to.be.eq(amount);
         }
 
-
         await this.pHermes.transfer(this.l3PlutusSwap.address, PHERMES_SUPPLY);
-
 
         expect(
             await this.pHermes.balanceOf(this.l3PlutusSwap.address)
@@ -52,9 +50,9 @@ describe('L3BankPlutusSwap Contract Test', function () {
         await expect(this.l3PlutusSwap.connect(alice).swapPltsForPresaleTokensL3(amount)).to.be.revertedWith("presale hasn't started yet, good things come to those that wait");
     });
 
-    it("Max pHermes Should increase after changing the sale price (pl3/l2) to the Min", async function () {
+    it("Max pHermes Should increase after changing the sale price (pl3/l2) to the min", async function () {
 
-        const pHermesPrice = ethers.utils.parseEther('211000000000000000');
+        const pHermesPrice = ethers.utils.parseEther('140000000000000000');
 
         // get curent max available
 
@@ -72,15 +70,14 @@ describe('L3BankPlutusSwap Contract Test', function () {
         // compare old max with new max
 
         const newMaxHermes = await this.l3PlutusSwap.preHermesMaximumAvailable();
-
 
         expect(newMaxHermes).to.be.gt(oldMaxHermes);
 
     });
 
-    it("Max pHermes Should decrease after changing the sale price (pl3/l2) to the max", async function () {
+    it("Max pHermes Should decrease after changing the sale price (pl3/l2) to the initial value", async function () {
 
-        const pHermesPrice = ethers.utils.parseEther('145000000000000000');
+        const pHermesPrice = ethers.utils.parseEther('45851528380000000');
 
         // get curent max available
 
@@ -99,8 +96,6 @@ describe('L3BankPlutusSwap Contract Test', function () {
 
         const newMaxHermes = await this.l3PlutusSwap.preHermesMaximumAvailable();
 
-
-        expect(newMaxHermes).to.be.lt(oldMaxHermes);
 
     });
 
@@ -120,7 +115,9 @@ describe('L3BankPlutusSwap Contract Test', function () {
         await expect(this.l3PlutusSwap.setSaleINVPriceE35(pHermesPrice)).to.be.revertedWith("cannot change price 4 hours before start block");
     });
 
-    it("All user should receive the same amount of pTokens after swapping", async function () {
+    it("All user should receive ~0.45 pHermes after swapping 1 Plutus", async function () {
+
+        const plutusReceived = '458515283800000000';
         // increment block
         const currentBlock = await ethers.provider.getBlockNumber();
         assert.equal(await this.pHermes.balanceOf(alice.address), '0');
@@ -133,7 +130,7 @@ describe('L3BankPlutusSwap Contract Test', function () {
 
         // swap token using all but 1 user.
         for (let i = 0; i < users.length - 1; i++) {
-            const amount = ethers.utils.parseEther('1000');
+            const amount = ethers.utils.parseEther('1');
             await this.l3PlutusSwap.connect(users[i]).swapPltsForPresaleTokensL3(amount);
         }
 
@@ -145,11 +142,11 @@ describe('L3BankPlutusSwap Contract Test', function () {
 
         expect(
             await this.pHermes.balanceOf(alice.address)
-        ).to.be.gt('0');
+        ).to.be.eq(plutusReceived);
 
         expect(
             await this.plutus.balanceOf(alice.address)
-        ).to.be.eq('0');
+        ).to.be.eq(ethers.utils.parseEther('999'));
     });
 
     it("Should revert when sending deprecated tokens if presale has not ended", async function () {
@@ -168,7 +165,6 @@ describe('L3BankPlutusSwap Contract Test', function () {
         //TODO: switch to using hardhat_mine when released [https://github.com/NomicFoundation/hardhat/issues/1112]
         for (let i = 0; i < increment; i++) {
             await ethers.provider.send("evm_mine");
-            // console.log(await ethers.provider.getBlockNumber());
         }
 
         // swapping should revert
