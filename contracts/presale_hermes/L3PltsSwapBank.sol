@@ -148,7 +148,7 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
         );
 
         preHermesRemaining = preHermesRemaining - preHermesPurchaseAmount;
-        
+
         // update whitelisted user info.
         whitelisted[msg.sender].allowance -= plutusToSwap;
 
