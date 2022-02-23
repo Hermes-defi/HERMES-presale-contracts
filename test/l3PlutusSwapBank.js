@@ -5,6 +5,7 @@ describe('L3PlutusSwapBank Contract Test', function () {
     this.timeout(0); // this is important to prevent timeout when increasing blocks.
     let deployer, alice, bob, charlie, david, attacker;
     let users;
+    let whiteListedAmount;
 
     const PLUTUS_SUPPLY = ethers.utils.parseEther('714285.7143'); // ~700k tokens
     const PHERMES_SUPPLY = ethers.utils.parseEther('1811855'); // ~1M tokens
@@ -29,18 +30,23 @@ describe('L3PlutusSwapBank Contract Test', function () {
         // fund users account with 1000 plutus each
 
         for (let i = 0; i < users.length; i++) {
-            const amount = ethers.utils.parseEther('1000');
-            await this.plutus.transfer(users[i].address, amount);
-            await this.plutus.connect(users[i]).approve(this.l3PlutusSwapBank.address, amount);
-            await this.l3PlutusSwapBank.whitelistUser(users[i].address);
+            const walletBalance = ethers.utils.parseEther('1000');
+            whiteListedAmount = ethers.utils.parseEther('500');
+
+            await this.plutus.transfer(users[i].address, walletBalance);
+            await this.plutus.connect(users[i]).approve(this.l3PlutusSwapBank.address, walletBalance);
+
+            // whitelist bank users
+            await this.l3PlutusSwapBank.whitelistUser(users[i].address, whiteListedAmount);
+
             expect(
                 await this.plutus.balanceOf(users[i].address)
-            ).to.be.eq(amount);
+            ).to.be.eq(walletBalance);
         }
         // fund attacker account
-        const attackAmount = ethers.utils.parseEther('1000');
-        await this.plutus.transfer(attacker.address, attackAmount);
-        await this.plutus.connect(attacker).approve(this.l3PlutusSwapBank.address, attackAmount);
+        const attackerBalance = ethers.utils.parseEther('1000');
+        await this.plutus.transfer(attacker.address, attackerBalance);
+        await this.plutus.connect(attacker).approve(this.l3PlutusSwapBank.address, attackerBalance);
 
         // fund swap contract
         await this.pHermes.transfer(this.l3PlutusSwapBank.address, PHERMES_SUPPLY);
@@ -156,6 +162,18 @@ describe('L3PlutusSwapBank Contract Test', function () {
         expect(
             await this.plutus.balanceOf(alice.address)
         ).to.be.eq(ethers.utils.parseEther('999'));
+    });
+
+    it("Users should have their allowance decreased by 1 PLTS", async function () {
+        const userAllowance = await this.l3PlutusSwapBank.swapAllowance(alice.address);
+        expect(userAllowance).to.be.eq(ethers.utils.parseEther('499'));
+    });
+
+    it("Should revert when users try to swap more than their allowance", async function () {
+        const bobRemainingBalance = await this.plutus.balanceOf(bob.address);
+        assert.isAbove(bobRemainingBalance, whiteListedAmount);
+        await expect(this.l3PlutusSwapBank.connect(bob).swapPltsForPresaleTokensL3(bobRemainingBalance)).to.be.revertedWith("Not allowed to swap this much PLTS");
+
     });
 
     it("Should revert when non whitelisted users tries to swap", async function () {

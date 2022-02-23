@@ -34,7 +34,12 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
     uint256 public startBlock;
     uint256 public endBlock = startBlock + PRESALE_DURATION;
 
-    mapping(address => bool) public whitelisted;
+    struct WhitelistedUserInfo {
+        bool whiteListed;
+        uint256 allowance;
+    }
+
+    mapping(address => WhitelistedUserInfo) public whitelisted;
 
     event PrePurchased(
         address sender,
@@ -80,14 +85,8 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
 
     /// @dev requires that users be whiteListed to execute functions
     modifier isWhitelisted(address _account) {
-        require(whitelisted[_account], "User is not Allowed.");
+        require(whitelisted[_account].whiteListed, "User is not Allowed.");
         _;
-    }
-
-    /// @dev whitelist users that are allowed to swap using this contract.
-    function whitelistUser(address _account) public onlyOwner {
-        require(_account != address(0), "Invalid address.");
-        whitelisted[_account] = true;
     }
 
     /// @notice swap l2 token for l3 presale token.
@@ -119,8 +118,13 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
         require(
             IERC20(preHermesAddress).balanceOf(address(this)) > 0,
             "No more PreHermes left! Come back next time!"
-        ); // check if cotract has presale tokens to give
+        ); // checks if contract has presale tokens to give
         require(plutusToSwap > 1e6, "not enough plutus provided"); // requires a minimum plts token to swap
+
+        require(
+            whitelisted[msg.sender].allowance >= plutusToSwap,
+            "Not allowed to swap this much PLTS"
+        );
 
         uint256 originalPreHermesAmount = (plutusToSwap *
             preHermesSaleINVPriceE35) / 1e35;
@@ -128,7 +132,6 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
         uint256 preHermesPurchaseAmount = originalPreHermesAmount;
 
         // if we dont have enough left, give them the rest.
-
         if (preHermesRemaining < preHermesPurchaseAmount)
             preHermesPurchaseAmount = preHermesRemaining;
 
@@ -144,6 +147,11 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
                 IERC20(preHermesAddress).balanceOf(address(this))
         );
 
+        preHermesRemaining = preHermesRemaining - preHermesPurchaseAmount;
+        
+        // update whitelisted user info.
+        whitelisted[msg.sender].allowance -= plutusToSwap;
+
         require(
             IERC20(preHermesAddress).transfer(
                 msg.sender,
@@ -151,8 +159,6 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
             ),
             "failed sending preHermes"
         );
-
-        preHermesRemaining = preHermesRemaining - preHermesPurchaseAmount;
 
         require(
             IERC20(plutusAddress).transferFrom(
@@ -232,5 +238,21 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
         endBlock = _newStartBlock + PRESALE_DURATION;
 
         emit StartBlockChanged(_newStartBlock, endBlock);
+    }
+
+    /// @dev whitelist users that are allowed to swap using this contract.
+    function whitelistUser(address _account, uint256 _allowance)
+        public
+        onlyOwner
+    {
+        require(_account != address(0), "Invalid address.");
+        require(_allowance > 0, "Insufficient PLTS balance in Bank.");
+        whitelisted[_account].whiteListed = true;
+        whitelisted[_account].allowance += _allowance;
+    }
+
+    /// @notice check the max plts allowed to swap.
+    function swapAllowance(address _account) public view returns (uint256) {
+        return whitelisted[_account].allowance;
     }
 }
