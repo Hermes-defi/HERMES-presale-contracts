@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 // import "hardhat/console.sol";
+//TODO: whitelist users.
 
 /// @title Contract that swaps plutus token for PreHermes tokens.
 /// @dev This contract should have l3 presale balance to work properly.
@@ -14,7 +15,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// @dev Any remaining presale tokens stay in this contract after pre-sale ends.
 /// @custom:note Only ~42.9% of minted L3presale tokens were sent to this contract.
 /// The rest is sent to the other swap contract
-contract L3PltsSwap is Ownable, ReentrancyGuard {
+contract L3PltsSwapGen is Ownable, ReentrancyGuard {
     address public constant FEE_ADDRESS =
         0x1109c5BB8Abb99Ca3BBeff6E60F5d3794f4e0473;
 
@@ -22,10 +23,11 @@ contract L3PltsSwap is Ownable, ReentrancyGuard {
 
     address public immutable preHermesAddress;
 
-    uint256 public constant pltsSwapPresaleSize = 7142857143 * (10**14); // 714,285.7143 amount of PLTS expected to be swapped?
+    // uint256 public constant pltsSwapPresaleSize = 7142857143 * (10**14); // 714,285.7143 amount of PLTS expected to be swapped?
+    uint256 public constant pltsSwapPresaleSize = 1635714286 * (10**15); // 714,285.7143 amount of PLTS expected to be swapped?
 
-    uint256 public preHermesSaleINVPriceE35 = 1486595745 * (10**26); // this price (pHRMS/PLTS) stays fixed during the sale.
-    // uint256 public preHermesSaleINVPriceE35 = 4585152838 * (10**25); // this price (pHRMS/PLTS) stays fixed during the sale.
+    // uint256 public preHermesSaleINVPriceE35 = 1486595745 * (10**26); // this price (pHRMS/PLTS) stays fixed during the sale.
+    uint256 public preHermesSaleINVPriceE35 = 4585152838 * (10**25); // this price (pHRMS/PLTS) stays fixed during the sale.
 
     uint256 public preHermesMaximumAvailable =
         (pltsSwapPresaleSize * preHermesSaleINVPriceE35) / 1e35; // max amount of presale Dakside tokens available to swap
