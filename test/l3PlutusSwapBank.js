@@ -62,7 +62,7 @@ describe('L3PlutusSwapBank Contract Test', function () {
         await expect(this.l3PlutusSwapBank.connect(alice).swapPltsForPresaleTokensL3(amount)).to.be.revertedWith("presale hasn't started yet, good things come to those that wait");
     });
 
-    it("Max pHermes Should increase after changing the sale price (pl3/l2) to the Min", async function () {
+    it("Max pHermes available should increase after changing the sale price (pl3/l2) to the min price", async function () {
 
         const pHermesPrice = ethers.utils.parseEther('211000000000000000');
 
@@ -88,9 +88,9 @@ describe('L3PlutusSwapBank Contract Test', function () {
 
     });
 
-    it("Max pHermes Should decrease after changing the sale price (pl3/l2) back to original price", async function () {
+    it("Max pHermes available should decrease after changing the sale price (pl3/l2) to max price", async function () {
 
-        const pHermesPrice = ethers.utils.parseEther('148659574500000000');
+        const pHermesPrice = ethers.utils.parseEther('145000000000000000');
 
         // get curent max available
 
@@ -111,6 +111,35 @@ describe('L3PlutusSwapBank Contract Test', function () {
 
 
         expect(newMaxHermes).to.be.lt(oldMaxHermes);
+
+    });
+
+    it("Max pHermes available should equal 1,061,854.103 after changing the sale price to 1.486595745 (pl3/l2) ", async function () {
+
+        const pHermesPrice = ethers.utils.parseEther('148659574500000000');
+        const max_pHermes = ethers.utils.parseEther('1061854.103');
+        const delta = ethers.utils.parseEther('0.1');
+
+        // get curent max available
+
+        const oldMaxHermes = await this.l3PlutusSwapBank.preHermesMaximumAvailable();
+
+        await this.l3PlutusSwapBank.setSaleINVPriceE35(pHermesPrice);
+
+        // compare old price with new price
+
+        const newHermesSalePrice = await this.l3PlutusSwapBank.preHermesSaleINVPriceE35();
+
+
+        expect(newHermesSalePrice).to.be.eq(pHermesPrice);
+
+        // compare old max with new max
+
+        const newMaxHermes = await this.l3PlutusSwapBank.preHermesMaximumAvailable();
+
+
+        // expect(newMaxHermes).to.be.eq(max_pHermes);
+        expect(newMaxHermes).to.be.closeTo(max_pHermes, delta);
 
     });
 

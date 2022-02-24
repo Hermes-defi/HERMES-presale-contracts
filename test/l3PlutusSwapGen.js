@@ -50,7 +50,7 @@ describe('L3PlutusSwapGen Contract Test', function () {
         await expect(this.l3PlutusSwap.connect(alice).swapPltsForPresaleTokensL3(amount)).to.be.revertedWith("presale hasn't started yet, good things come to those that wait");
     });
 
-    it("Max pHermes Should increase after changing the sale price (pl3/l2) to the min", async function () {
+    it("Max pHermes available should increase after changing the sale price (pl3/l2) to the min value", async function () {
 
         const pHermesPrice = ethers.utils.parseEther('140000000000000000');
 
@@ -75,7 +75,7 @@ describe('L3PlutusSwapGen Contract Test', function () {
 
     });
 
-    it("Max pHermes Should decrease after changing the sale price (pl3/l2) to the initial value", async function () {
+    it("Max pHermes available should decrease after changing the sale price (pl3/l2) to max value", async function () {
 
         const pHermesPrice = ethers.utils.parseEther('45851528380000000');
 
@@ -96,6 +96,33 @@ describe('L3PlutusSwapGen Contract Test', function () {
 
         const newMaxHermes = await this.l3PlutusSwap.preHermesMaximumAvailable();
 
+
+    });
+
+    it("Max pHermes available should equal 750,000 after changing the sale price to 0.4585152838 (pl3/l2) ", async function () {
+
+        const pHermesPrice = ethers.utils.parseEther('45851528380000000');
+        const max_pHermes = ethers.utils.parseEther('750000');
+        const delta = ethers.utils.parseEther('0.1');
+
+        // get curent max available
+
+        const oldMaxHermes = await this.l3PlutusSwap.preHermesMaximumAvailable();
+
+        await this.l3PlutusSwap.setSaleINVPriceE35(pHermesPrice);
+
+        // compare old price with new price
+
+        const newHermesSalePrice = await this.l3PlutusSwap.preHermesSaleINVPriceE35();
+
+
+        expect(newHermesSalePrice).to.be.eq(pHermesPrice);
+
+        // compare old max with new max
+
+        const newMaxHermes = await this.l3PlutusSwap.preHermesMaximumAvailable();
+
+        expect(newMaxHermes).to.be.closeTo(max_pHermes, delta);
 
     });
 
