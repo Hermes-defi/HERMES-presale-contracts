@@ -2,7 +2,8 @@
 
 pragma solidity ^0.8.0;
 
-import "../presale_hermes/L3PltsSwap.sol";
+import "../presale_hermes/L3PltsSwapBank.sol";
+import "../presale_hermes/L3PltsSwapGen.sol";
 
 /// @title Contract that swaps { PreHermes} for { Hermes}.
 /// @dev This contract should have { Hermes} balance to work properly
@@ -18,7 +19,8 @@ contract L3HermesTokenRedeem is Ownable, ReentrancyGuard {
 
     address public immutable hermesAddress;
 
-    L3PltsSwap public immutable l3PltsSwap;
+    L3PltsSwapBank public immutable l3PltsSwapBank;
+    L3PltsSwapGen public immutable l3PltsSwapGen;
 
     uint256 public startBlock;
 
@@ -30,7 +32,8 @@ contract L3HermesTokenRedeem is Ownable, ReentrancyGuard {
 
     constructor(
         uint256 _startBlock,
-        L3PltsSwap _l3PltsSwap,
+        L3PltsSwapBank _l3PltsSwapBank,
+        L3PltsSwapGen _l3PltsSwapGen,
         address _preHermesAddress,
         address _hermesAddress
     ) {
@@ -40,20 +43,25 @@ contract L3HermesTokenRedeem is Ownable, ReentrancyGuard {
         );
         require(
             _preHermesAddress != _hermesAddress,
-            "preHermes cannot be equal to Hermes"
+            "preHermes cannot be equal to Hermes."
         );
         require(
             _preHermesAddress != address(0),
-            "_preHermesAddress cannot be the zero address"
+            "_preHermesAddress cannot be the zero address."
         );
         require(
             _hermesAddress != address(0),
-            "_HermesAddress cannot be the zero address"
+            "_HermesAddress cannot be the zero address."
+        );
+        require(
+            address(_l3PltsSwapBank) != address(_l3PltsSwapGen),
+            "Incorrect presale contract address."
         );
 
         startBlock = _startBlock;
 
-        l3PltsSwap = _l3PltsSwap;
+        l3PltsSwapBank = _l3PltsSwapBank;
+        l3PltsSwapGen = _l3PltsSwapGen;
 
         preHermesAddress = _preHermesAddress;
 
@@ -86,13 +94,17 @@ contract L3HermesTokenRedeem is Ownable, ReentrancyGuard {
         emit HermesSwap(msg.sender, hermesSwapAmount);
     }
 
-    /// @notice Sends any remaining L3 tokens to the fee address.
-    /// @dev This can only be called once L3 token presale has ended
-    /// @dev This can only be called once.
+    /// @notice Sends any unclaimed L3 tokens to the fee address.
+    /// @dev This can only be called once, after L3 token presale has ended.
     function sendUnclaimedsToFeeAddress() external onlyOwner {
         require(
-            block.number > l3PltsSwap.endBlock(),
-            "can only retrieve excess tokens after plts swap has ended"
+            block.number > l3PltsSwapBank.endBlock(),
+            "can only retrieve excess tokens after presale has ended."
+        );
+
+        require(
+            block.number > l3PltsSwapGen.endBlock(),
+            "can only retrieve excess tokens after presale has ended."
         );
 
         require(
@@ -100,7 +112,8 @@ contract L3HermesTokenRedeem is Ownable, ReentrancyGuard {
             "can only burn unsold presale once!"
         );
 
-        uint256 wastedPreHermesTokens = l3PltsSwap.preHermesRemaining();
+        uint256 wastedPreHermesTokens = l3PltsSwapBank.preHermesRemaining() +
+            l3PltsSwapGen.preHermesRemaining();
 
         require(
             wastedPreHermesTokens <=
