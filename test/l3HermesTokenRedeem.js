@@ -6,52 +6,58 @@ describe('L3TokenRedeem Contract Test', function () {
     let deployer, alice, bob, charlie, david, attacker;
     let users;
 
-    const PLUTUS_SUPPLY = ethers.utils.parseEther('834686'); // 834k tokens
+    const PLUTUS_SUPPLY = ethers.utils.parseEther('2350000'); // 2.35M tokens
 
-    const PHERMES_SUPPLY = ethers.utils.parseEther('107375'); // 107k tokens
+    const PHERMES_SUPPLY = ethers.utils.parseEther('1811854.103'); // 1.811M tokens
 
-    const HERMES_SUPPLY = ethers.utils.parseEther('250000'); // 250k tokens
+    const HERMES_SUPPLY = ethers.utils.parseEther('1811855'); // 1.811M tokens
 
 
     const PRESALE_START_BLOCK = 50;
-    const PRESALE_END_BLOCK = PRESALE_START_BLOCK + 71999;
+    const PRESALE_END_BLOCK = PRESALE_START_BLOCK + 117360;
     const REDEEM_START_BLOCK = 70;
     before(async function () {
 
         [deployer, alice, bob, charlie, david, attacker] = await ethers.getSigners();
         users = [alice, bob, charlie, david];
 
-        const L3PltsSwapFactory = await ethers.getContractFactory('L3PltsSwap', deployer);
+        const L3PltsSwapBankFactory = await ethers.getContractFactory('L3PltsSwapBank', deployer);
+        const L3PltsSwapGenFactory = await ethers.getContractFactory('L3PltsSwapGen', deployer);
         const L3TokenRedeemFactory = await ethers.getContractFactory('L3HermesTokenRedeem', deployer);
         const ERC20Factory = await ethers.getContractFactory('MockERC20', deployer);
 
         // deploy contracts
         this.plutus = await ERC20Factory.deploy("Plutus", "PLTS", PLUTUS_SUPPLY);
-
         this.pHermes = await ERC20Factory.deploy("pHermes", "pHRMS", PHERMES_SUPPLY);
-
         this.hermes = await ERC20Factory.deploy("Hermes", "HRMS", HERMES_SUPPLY);
 
-        this.l3PltsSwap = await L3PltsSwapFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address);
+        this.l3PltsSwapBank = await L3PltsSwapBankFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address);
+        this.l3PltsSwapGen = await L3PltsSwapGenFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address);
 
-        this.l3TokenRedeem = await L3TokenRedeemFactory.deploy(REDEEM_START_BLOCK, this.l3PltsSwap.address, this.pHermes.address, this.hermes.address);
+        this.l3TokenRedeem = await L3TokenRedeemFactory.deploy(REDEEM_START_BLOCK, this.l3PltsSwapBank.address, this.l3PltsSwapGen.address, this.pHermes.address, this.hermes.address);
 
-        // fund users account with 1000 hermes each
+        // fund each presale contract with pHermes needed.
+        const bankAmount = ethers.utils.parseEther('1061854.103');
+        const genAmount = ethers.utils.parseEther('750000');
+        await this.pHermes.transfer(this.l3PltsSwapBank.address, bankAmount);
+        await this.pHermes.transfer(this.l3PltsSwapGen.address, genAmount);
 
+        // fund users account with 1000 plutus each and approve spending.
         for (let i = 0; i < users.length; i++) {
             const amount = ethers.utils.parseEther('1000');
 
-            await this.pHermes.transfer(users[i].address, amount);
+            await this.plutus.transfer(users[i].address, amount);
 
-            await this.pHermes.connect(users[i]).approve(this.l3TokenRedeem.address, amount);
+            await this.plutus.connect(users[i]).approve(this.l3PltsSwapBank.address, amount);
+            await this.plutus.connect(users[i]).approve(this.l3PltsSwapGen.address, amount);
 
             expect(
-                await this.pHermes.balanceOf(users[i].address)
+                await this.plutus.balanceOf(users[i].address)
             ).to.be.eq(amount);
 
         }
 
-        // fund contract with hermes to use in swap.
+        // fund redeem contract with hermes.
 
         await this.hermes.transfer(this.l3TokenRedeem.address, HERMES_SUPPLY);
         expect(
@@ -68,7 +74,7 @@ describe('L3TokenRedeem Contract Test', function () {
 
     it("Should revert when trying to send unclaimed tokens to fee address", async function () {
 
-        await expect(this.l3TokenRedeem.sendUnclaimedsToFeeAddress()).to.be.revertedWith("can only retrieve excess tokens after plts swap has ended");
+        await expect(this.l3TokenRedeem.sendUnclaimedsToFeeAddress()).to.be.revertedWith("can only retrieve excess tokens after presale has ended.");
     });
 
 
@@ -86,16 +92,26 @@ describe('L3TokenRedeem Contract Test', function () {
         for (let i = 0; i < increment; i++) {
             await ethers.provider.send("evm_mine");
         }
+        let pHermesBalance;
+        for (let i = 0; i < users.length; i++) {
+            const amount = ethers.utils.parseEther('1');
+            await this.l3PltsSwapGen.connect(users[i]).swapPltsForPresaleTokensL3(amount);
+            pHermesBalance = await this.pHermes.balanceOf(users[i].address);
+            await this.pHermes.connect(users[i]).approve(this.l3TokenRedeem.address, pHermesBalance)
+            await this.l3TokenRedeem.connect(users[i]).swapPreHermesForHermes(pHermesBalance);
+        }
 
-        const amount = ethers.utils.parseEther('1000');
-        await this.l3TokenRedeem.connect(alice).swapPreHermesForHermes(amount);
+        const burnAmount = ethers.utils.parseEther('1.8340611352');
+        // await this.l3TokenRedeem.connect(alice).swapPreHermesForHermes(amount);
 
         // expect pHrms balance to be zero
         expect(await this.pHermes.balanceOf(alice.address)).to.be.eq('0');
+
         // expect pHrms to get burned
-        expect(await this.pHermes.balanceOf(await this.l3TokenRedeem.BURN_ADDRESS())).to.be.eq(amount);
+        expect(await this.pHermes.balanceOf(await this.l3TokenRedeem.BURN_ADDRESS())).to.be.eq(burnAmount);
+
         // expect user hermes balance to be equal to previous pHrms amount
-        expect(await this.hermes.balanceOf(alice.address)).to.be.eq(amount);
+        expect(await this.hermes.balanceOf(alice.address)).to.be.eq(pHermesBalance);
 
     });
 
