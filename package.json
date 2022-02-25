@@ -6,10 +6,8 @@
   "scripts": {
     "start": "ganache-cli --fork https://a.api.s0.t.hmny.io",
     "test:hermes": "hardhat test test/hermes.js ",
-    "test:l3ArcSwap": "hardhat test test/l3ArcSwap.js",
     "test:l3PltsSwapBank": "hardhat test test/l3PlutusSwapBank.js",
     "test:l3PltsSwapGen": "hardhat test test/l3PlutusSwapGen.js",
-    "test:l3DarksideTokenRedeem": "hardhat test test/l3TokenRedeem.js",
     "test:l3HermesTokenRedeem": "hardhat test test/l3HermesTokenRedeem.js",
     "compile": "hardhat compile",
     "deploy-mainnet": "truffle migrate --reset --network harmony",
