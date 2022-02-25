@@ -43,6 +43,17 @@ This repo contains the contracts and accompanying test needed to launch the pres
 - swap PHERMES for HERMES at 1:1 ratio.
 - set start block
 
+## Deployment
+### Local Testnet Deployment
+run `yarn start` in your terminal to start your local blockchain env. this will require that `ganache-cli` is installed globally on your machine.
+
+`yarn deploy-local` to run the deploy script and deploy all the  necessary contracts.
+
+### Harmony Testnet Deployment
+`yarn deploy-testnet` to run the deploy script and deploy all the  necessary contracts.
+### Harmony Mainnet Deployment
+`yarn deploy-mainnet` to run the deploy script and deploy all the  necessary contracts.
+
 ## Contract ABI
 
 ### pHermes
