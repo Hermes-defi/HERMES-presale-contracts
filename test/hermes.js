@@ -1,53 +1,62 @@
 const { ethers } = require('hardhat');
 const { expect, assert } = require('chai');
-const { utils } = require('ethers');
-
 
 function toWei(v) {
-    return utils.parseUnits(v, 18).toString();
+    return ethers.utils.parseUnits(v, 18).toString();
 }
 
-const PLUTUSADDRESS = "0xd32858211fcefd0be0dd3fd6d069c3e821e0aef3";
-
 describe("Hermes", function () {
-    let deployer, alice, bob, attacker;
+    let deployer, alice, bob, charlie, david, attacker;
     let users;
     beforeEach("Deploy contracts", async function () {
 
         [deployer, alice, bob, charlie, david, attacker] = await ethers.getSigners();
-
         const HermesFactory = await ethers.getContractFactory("Hermes", deployer);
-        const PlutusFactory = await ethers.getContractFactory("Plutus");
 
-        plutus = await PlutusFactory.attach(PLUTUSADDRESS);
 
-        await plutus.deployed();
-
-        hermes = await HermesFactory.deploy(plutus.address, "HERMES", "HRMS");
+        hermes = await HermesFactory.deploy();
         await hermes.deployed();
-
-        await plutus.connect(deployer).transfer(alice.address, "5");
-
-        const myPlutusBalance = await plutus.balanceOf(deployer.address);
 
         assert.equal((await hermes.cap()).toString(), toWei('30000000'));
     });
-    describe("when user deposits", () => {
 
-        it("Should receive some Hermes token and have decreased amount of PLTS", async () => {
-            const alicePltsBalance = (await plutus.balanceOf(alice.address));
-            const aliceHrmsBalance = (await hermes.balanceOf(alice.address));
+    describe("when Minter roles are required", () => {
 
-            await plutus.connect(alice).approve(hermes.address, alicePltsBalance);
-            await hermes.connect(alice).deposit(alicePltsBalance);
+        beforeEach("give minter role to charlie", async () => {
+            await hermes.grantMinterRole(charlie.address);
+        });
 
-            const newAliceHrmsBalance = (await hermes.balanceOf(alice.address));
-            const newAlicePltsBalance = (await plutus.balanceOf(alice.address));
-
-            expect(newAliceHrmsBalance).to.be.gt(aliceHrmsBalance);
-            expect(newAlicePltsBalance).to.be.lt(alicePltsBalance);
+        it("should mint when user with minter role tries to mint", async () => {
+            const mintAmount = ethers.utils.parseEther('10');
+            await hermes.connect(charlie).mint(charlie.address, mintAmount);
+            const charlieBalance = await hermes.balanceOf(charlie.address);
+            expect(charlieBalance).to.be.eq(mintAmount)
+        });
+        it("should revert when non minter role tries to mint", async () => {
+            const mintAmount = ethers.utils.parseEther('10');
+            await expect(hermes.connect(alice).mint(alice.address, mintAmount)).to.be.reverted;
         });
     });
+    describe("when Burner roles are required", () => {
+
+        beforeEach("give Burner role to charlie", async () => {
+            transferAmount = await ethers.utils.parseEther('10');
+            await hermes.mint(alice.address, transferAmount);
+            await hermes.grantBurnerRole(charlie.address);
+        });
+
+        it("should burn when user with burner role tries to burn", async () => {
+            const burnAmount = ethers.utils.parseEther('10');
+            await hermes.connect(charlie).burn(alice.address, burnAmount);
+            const aliceBalance = await hermes.balanceOf(alice.address);
+            expect(aliceBalance).to.be.eq('0')
+        });
+        it("should revert when non burner role tries to burn", async () => {
+            const burnAmount = ethers.utils.parseEther('10');
+            await expect(hermes.connect(alice).burn(alice.address, burnAmount)).to.be.reverted;
+        });
+    });
+
     describe("when cap is reached", () => {
 
         beforeEach("Mint the max amount", async () => {
@@ -61,13 +70,9 @@ describe("Hermes", function () {
             expect(totalSupply).to.be.equal(maxSupply);
         });
 
-        it("Should revert on deposit due to max supply being reached.", async () => {
-            const alicePltsBalance = (await plutus.balanceOf(alice.address)).toString();
+        it("Should revert on mint due to max supply being reached.", async () => {
 
-            await plutus.connect(alice).approve(hermes.address, alicePltsBalance);
-            // exect revert | cap reached
-            await expect(hermes.connect(alice).deposit(alicePltsBalance)).to.be.revertedWith("ERC20Capped: cap exceeded")
-
+            await expect(hermes.mint(alice.address, '500')).to.be.revertedWith("ERC20Capped: cap exceeded")
         });
     });
 });
