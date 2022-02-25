@@ -34,23 +34,17 @@ module.exports = {
   },
 
   networks: {
+
     localhost: {
       url: "http://127.0.0.1:8545",
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
 
-    ropsten: {
-      url: process.env.ROPSTEN_URL || "",
-      accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    one: {
+      url: 'https://rpc.hermesdefi.io',
+      accounts: [`${process.env.PRIVATE_KEY}`]
     },
   },
-  gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
-    currency: "USD",
-  },
-  etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY,
-  },
+
 };
