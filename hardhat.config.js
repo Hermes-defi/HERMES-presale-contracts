@@ -41,7 +41,11 @@ module.exports = {
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
 
-    one: {
+    harmonyTestnet: {
+      url: 'https://api.s0.b.hmny.io',
+      accounts: [`${process.env.PRIVATE_KEY}`]
+    },
+    harmony: {
       url: 'https://rpc.hermesdefi.io',
       accounts: [`${process.env.PRIVATE_KEY}`]
     },
