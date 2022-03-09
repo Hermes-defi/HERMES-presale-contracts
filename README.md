@@ -11,30 +11,37 @@ This repo contains the contracts and accompanying test needed to launch the pres
 `yarn test:l3PltsSwapGen` to run test for l3PltsSwapGen contract.
 `yarn test:l3HermesTokenRedeem` to run test for l3HermesTokenRedeem contract.
 
+`yarn hardhat test` to run all test. This can take a while.
 
 
-## Prerequisits
+
+## Process Flow
 - collect data on bank users
-- deploy swap contracts
+- create PHERMES contract
+- send PHERMES to L3HermesBankSwap contracts.  [See link for details.](https://docs.google.com/spreadsheets/d/1mVKGZvjQubqxeaCxpBVMVaDMDoCVSEN8/edit#gid=1817589439) 
+- send PHERMES to L3HermesRegSwap contracts.  [See link for details.](https://docs.google.com/spreadsheets/d/1mVKGZvjQubqxeaCxpBVMVaDMDoCVSEN8/edit#gid=1817589439) 
+- create HERMES contract 
+- update L3HermesBankSwap & L3HermesRegSwap with latest PLTS token data.
+- deploy  L3HermesBankSwap & L3HermesRegSwap contracts
+- deploy  l3HermesTokenRedeem contracts
+- mint HERMES to l3HermesTokenRedeem contract.  [See link for details.](https://docs.google.com/spreadsheets/d/1mVKGZvjQubqxeaCxpBVMVaDMDoCVSEN8/edit#gid=1817589439)
+- whitelist users for the L3HermesBankSwap contracts using collected data.
 - add L3HermesBankSwap contracts to PLTS whitelist
 - add L3HermesRegSwap contracts to PLTS whitelist
-- create PHERMES contract
-- send PHERMES (1,061,855) to L3HermesBankSwap contracts
-- send PHERMES (750,000) to L3HermesRegSwap contracts
-- create HERMES contract
-- send HERMES to RedeemToken contract
+- transfer all ownership to admin/fee address
+
 
 
 ### Bank users swap contract 
-- `Max pHermes distributed:  1,061,854.103 `
-- `Max PLTS to swap:  714,285.7143  * (10**18)`
+- `Max pHermes distributed:  966,929.57 `
+- `Max PLTS to swap:  1,462,790.89  * (10**18)`
 - `INV Price: 1486595745 * 10^16`
 - `presale duration: 117360 blocks`
 - whitelist bank users
 
-### Common Users swap contract
-- `Max hermes distriuted to token holders: 750,000`
-- `Max PLTS to swap: 1,635,714.286  * (10**18)`
+### General public swap contract
+- `Max hermes distriuted to token holders: 833,070.43`
+- `Max PLTS to swap: 1,487,209.11  * (10**18)`
 - `INV Price: 1635714286 * 10^15  `
 - `presale duration: 117360 blocks`
 
@@ -95,6 +102,100 @@ This contract is the hermes presale token.
         {
           "indexed": true,
           "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
           "name": "from",
           "type": "address"
         },
@@ -113,6 +214,45 @@ This contract is the hermes presale token.
       ],
       "name": "Transfer",
       "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "BURNER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MINTER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
     },
     {
       "inputs": [
@@ -182,6 +322,37 @@ This contract is the hermes presale token.
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "burn",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "cap",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "decimals",
       "outputs": [
@@ -221,6 +392,93 @@ This contract is the hermes presale token.
     {
       "inputs": [
         {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        }
+      ],
+      "name": "grantBurnerRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        }
+      ],
+      "name": "grantMinterRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "spender",
           "type": "address"
@@ -243,6 +501,24 @@ This contract is the hermes presale token.
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "mint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "name",
       "outputs": [
@@ -250,6 +526,107 @@ This contract is the hermes presale token.
           "internalType": "string",
           "name": "",
           "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeBurnerRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeMinterRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
         }
       ],
       "stateMutability": "view",
@@ -333,8 +710,21 @@ This contract is the hermes presale token.
       ],
       "stateMutability": "nonpayable",
       "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
     }
-  ],
+  ]
 
 ### l3PltsSwapBank
 This contract is the presale contract to be used by whitelisted bank users. It will swap PLTS for pHERMES at a predetermined ratio.
@@ -739,7 +1129,7 @@ This contract is the presale contract to be used by whitelisted bank users. It w
       "stateMutability": "view",
       "type": "function"
     }
-  ]
+  ],
 
 ### l3PltsSwapGen
 This contract is the presale contract to be used all users. It will swap PLTS for pHERMES at a predetermined ratio. 
@@ -1360,3 +1750,4 @@ This contract is the redeem contract to be used all users to swappHermes for Her
 ## References
 - https://docs.google.com/spreadsheets/d/1kwgZ7iTl-ifZ917oVPL4K9X3yaHqQuKv/edit#gid=1355182352
 - https://docs.google.com/document/d/1rtLWQB_bQTzVAuqbpjRw89fo1uySVNN7VDaLhZKLxsc/edit
+- https://docs.google.com/spreadsheets/d/1mVKGZvjQubqxeaCxpBVMVaDMDoCVSEN8/edit#gid=1817589439
