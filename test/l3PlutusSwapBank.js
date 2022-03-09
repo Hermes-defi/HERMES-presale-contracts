@@ -1,4 +1,4 @@
-const { ethers } = require('hardhat');
+const { ethers, network } = require('hardhat');
 const { expect, assert } = require('chai');
 
 describe('L3PlutusSwapBank Contract Test', function () {
@@ -20,10 +20,11 @@ describe('L3PlutusSwapBank Contract Test', function () {
 
         const L3PlutusSwapFactory = await ethers.getContractFactory('L3PltsSwapBank', deployer);
         const ERC20Factory = await ethers.getContractFactory('MockERC20', deployer);
+        const PhermesFactory = await ethers.getContractFactory('PreHermes', deployer);
 
         // deploy contracts
         this.plutus = await ERC20Factory.deploy("Plutus", "PLTS", PLUTUS_SUPPLY);
-        this.pHermes = await ERC20Factory.deploy("pHermes", "pHRMS", PHERMES_SUPPLY);
+        this.pHermes = await PhermesFactory.deploy(deployer.address);
         this.l3PlutusSwapBank = await L3PlutusSwapFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address);
 
 
@@ -246,4 +247,12 @@ describe('L3PlutusSwapBank Contract Test', function () {
         // expect fee address to have the previous contract balance.
         expect(await this.plutus.balanceOf(await this.l3PlutusSwapBank.FEE_ADDRESS())).to.be.eq(contractBalance);
     });
+
+    after(async function () {
+        await network.provider.request({
+            method: "hardhat_reset",
+            params: [],
+        })
+    })
+
 });

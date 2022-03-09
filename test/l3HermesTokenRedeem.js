@@ -1,4 +1,4 @@
-const { ethers } = require('hardhat');
+const { ethers, network } = require('hardhat');
 const { expect, assert } = require('chai');
 
 describe('L3TokenRedeem Contract Test', function () {
@@ -8,9 +8,7 @@ describe('L3TokenRedeem Contract Test', function () {
 
     const PLUTUS_SUPPLY = ethers.utils.parseEther('2350000'); // 2.35M tokens
 
-    const PHERMES_SUPPLY = ethers.utils.parseEther('1811854.103'); // 1.811M tokens
-
-    const HERMES_SUPPLY = ethers.utils.parseEther('1811855'); // 1.811M tokens
+    const HERMES_SUPPLY = ethers.utils.parseEther('1811855'); // 1.8M tokens
 
 
     const PRESALE_START_BLOCK = 50;
@@ -25,20 +23,27 @@ describe('L3TokenRedeem Contract Test', function () {
         const L3PltsSwapGenFactory = await ethers.getContractFactory('L3PltsSwapGen', deployer);
         const L3TokenRedeemFactory = await ethers.getContractFactory('L3HermesTokenRedeem', deployer);
         const ERC20Factory = await ethers.getContractFactory('MockERC20', deployer);
+        const PhermesFactory = await ethers.getContractFactory('PreHermes', deployer);
+        const HERMESFactory = await ethers.getContractFactory('Hermes', deployer);
 
         // deploy contracts
         this.plutus = await ERC20Factory.deploy("Plutus", "PLTS", PLUTUS_SUPPLY);
-        this.pHermes = await ERC20Factory.deploy("pHermes", "pHRMS", PHERMES_SUPPLY);
-        this.hermes = await ERC20Factory.deploy("Hermes", "HRMS", HERMES_SUPPLY);
+        this.pHermes = await PhermesFactory.deploy(deployer.address);
+        // this.pHermes = await PhermesFactory.deploy("pHermes", "pHRMS", PHERMES_SUPPLY);
+        // this.hermes = await HERMESFactory.deploy("Hermes", "HRMS", HERMES_SUPPLY);
+        this.hermes = await HERMESFactory.deploy();
+
 
         this.l3PltsSwapBank = await L3PltsSwapBankFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address);
         this.l3PltsSwapGen = await L3PltsSwapGenFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address);
 
         this.l3TokenRedeem = await L3TokenRedeemFactory.deploy(REDEEM_START_BLOCK, this.l3PltsSwapBank.address, this.l3PltsSwapGen.address, this.pHermes.address, this.hermes.address);
 
+
+
         // fund each presale contract with pHermes needed.
-        const bankAmount = ethers.utils.parseEther('1061854.103');
-        const genAmount = ethers.utils.parseEther('750000');
+        const bankAmount = ethers.utils.parseEther('966929.57');
+        const genAmount = ethers.utils.parseEther('833070.43');
         await this.pHermes.transfer(this.l3PltsSwapBank.address, bankAmount);
         await this.pHermes.transfer(this.l3PltsSwapGen.address, genAmount);
 
@@ -59,7 +64,7 @@ describe('L3TokenRedeem Contract Test', function () {
 
         // fund redeem contract with hermes.
 
-        await this.hermes.transfer(this.l3TokenRedeem.address, HERMES_SUPPLY);
+        await this.hermes.mint(this.l3TokenRedeem.address, HERMES_SUPPLY);
         expect(
             await this.hermes.balanceOf(this.l3TokenRedeem.address)
         ).to.be.eq(HERMES_SUPPLY);
@@ -130,4 +135,11 @@ describe('L3TokenRedeem Contract Test', function () {
 
         expect(finalFeeAddrBalance).to.be.gt(initialFeeAddrBalance);
     });
+
+    after(async function () {
+        await network.provider.request({
+            method: "hardhat_reset",
+            params: [],
+        })
+    })
 });
