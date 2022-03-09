@@ -64,7 +64,7 @@ describe('L3PlutusSwapBank Contract Test', function () {
 
     it("Max pHermes available should increase after changing the sale price (pl3/l2) to the min price", async function () {
 
-        const pHermesPrice = ethers.utils.parseEther('211000000000000000');
+        const pHermesPrice = ethers.utils.parseEther('80000000000000000');
 
         // get curent max available
 
@@ -90,7 +90,7 @@ describe('L3PlutusSwapBank Contract Test', function () {
 
     it("Max pHermes available should decrease after changing the sale price (pl3/l2) to max price", async function () {
 
-        const pHermesPrice = ethers.utils.parseEther('145000000000000000');
+        const pHermesPrice = ethers.utils.parseEther('66000000000000000');
 
         // get curent max available
 
@@ -114,10 +114,10 @@ describe('L3PlutusSwapBank Contract Test', function () {
 
     });
 
-    it("Max pHermes available should equal 1,061,854.103 after changing the sale price to 1.486595745 (pl3/l2) ", async function () {
+    it("Max pHermes available should equal 966,929.57 after changing the sale price to 0.66101 (pl3/l2) ", async function () {
+        const pHermesPrice = ethers.utils.parseEther('66101694920000000');
 
-        const pHermesPrice = ethers.utils.parseEther('148659574500000000');
-        const max_pHermes = ethers.utils.parseEther('1061854.103');
+        const max_pHermes = ethers.utils.parseEther('966929.57');
         const delta = ethers.utils.parseEther('0.1');
 
         // get curent max available
@@ -159,8 +159,9 @@ describe('L3PlutusSwapBank Contract Test', function () {
         await expect(this.l3PlutusSwapBank.setSaleINVPriceE35(pHermesPrice)).to.be.revertedWith("cannot change price 4 hours before start block");
     });
 
-    it("All users should receive ~1.48 pHermes after swapping 1 Plutus", async function () {
-        const plutusReceived = '1486595745000000000';
+    it("All users should receive ~0.66 pHermes after swapping 1 Plutus", async function () {
+        const delta = ethers.utils.parseEther('0.0011');
+        const pHermesReceived = ethers.utils.parseEther('0.66');
 
         // increment block
         const currentBlock = await ethers.provider.getBlockNumber();
@@ -184,9 +185,7 @@ describe('L3PlutusSwapBank Contract Test', function () {
             await this.pHermes.balanceOf(alice.address)
         ).to.be.eq(await this.pHermes.balanceOf(bob.address));
 
-        expect(
-            await this.pHermes.balanceOf(alice.address)
-        ).to.be.eq(plutusReceived);
+        expect(await this.pHermes.balanceOf(alice.address)).to.be.closeTo(pHermesReceived, delta);
 
         expect(
             await this.plutus.balanceOf(alice.address)

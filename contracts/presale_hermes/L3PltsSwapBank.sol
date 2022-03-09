@@ -18,12 +18,12 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
 
     address public immutable preHermesAddress;
 
-    uint256 public constant PLTS_SWAP_PRESALE_SIZE = 7142857143 * (10**14); // 714,285.7143 amount of PLTS expected to be swapped?
+    uint256 public constant PLTS_SWAP_PRESALE_SIZE =
+        14627908917828694 * (10**8); // 1,462,790.8917828694 amount of PLTS expected to be swapped?
 
-    uint256 public preHermesSaleINVPriceE35 = 1486595745 * (10**26); // this price (pHRMS/PLTS) stays fixed during the sale.
-
+    uint256 public preHermesSaleINVPriceE35 = 6610169492 * (10**25); // this price (pHRMS/PLTS) stays fixed during the sale.
     uint256 public preHermesMaximumAvailable =
-        (PLTS_SWAP_PRESALE_SIZE * preHermesSaleINVPriceE35) / 1e35; // max amount of presale Dakside tokens available to swap
+        (PLTS_SWAP_PRESALE_SIZE * preHermesSaleINVPriceE35) / 1e35; // max amount of presale hermes tokens available to swap
 
     // We use a counter to defend against people sending pre{Hermes} back
     uint256 public preHermesRemaining = preHermesMaximumAvailable;
@@ -203,11 +203,11 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
         );
 
         require(
-            _newPreHermesSaleINVPriceE35 >= 145 * (10**33),
+            _newPreHermesSaleINVPriceE35 >= 66 * (10**33),
             "new Hermes price is to high!"
         );
         require(
-            _newPreHermesSaleINVPriceE35 <= 211 * (10**33),
+            _newPreHermesSaleINVPriceE35 <= 80 * (10**33),
             "new Hermes price is too low!"
         );
 
