@@ -70,15 +70,14 @@ async function main() {
 
   // whitelist users
 
-  // for (var i = 0; i < jason.length; i++) {
+  for (var i = 0; i < jason.length; i++) {
 
-  //   var obj = jason[i];
-  //   await l3PltsSwapBank.whitelistUser(obj["address"], hre.ethers.utils.parseEther(obj["amount"]));
+    var obj = jason[i];
+    await l3PltsSwapBank.whitelistUser(obj["address"], hre.ethers.utils.parseEther(obj["amount"]));
 
-  // }
+  }
 
-  // TODO: fund bank and gen contracts with pHERMES
-
+  
   // transfer pHERMES to l3PlutusSwapBank
   console.log("phermes total suply", await pHermes.totalSupply());
   await pHermes.transfer(l3PltsSwapBank.address, L3PLTSSWAPBANK_PHERMES_BALANCE);
@@ -92,9 +91,10 @@ async function main() {
   // mint HERMES to L3HermesTokenRedeem
   await hermes.mint(l3HermesTokenRedeem.address, TOKENREDEEM_HERMES_SUPPLY)
   console.log("tokenRedeem HERMES balance", await hermes.balanceOf(l3HermesTokenRedeem.address))
+  
   // add l3PlutusSwapBank & l3PlutusSwapGen to plutus whitelist
 
-  //TODO: // transfer ownership after deployment
+  // transfer ownership after deployment
   await pHermes.transferOwnership(ADMIN_ADDRESS);
   await hermes.transferOwnership(ADMIN_ADDRESS);
   await l3PltsSwapBank.transferOwnership(ADMIN_ADDRESS);
