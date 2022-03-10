@@ -8,19 +8,17 @@ const path = require("path");
 const csv = require('csvtojson');
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+
 
   var absolutePath = path.resolve("./scripts/addresses-merged.csv");
 
 
   let currentBlock;
   const [deployer] = await ethers.getSigners();
-  const PLUTUS_ADDRESS = "0xd32858211fcefd0be0dd3fd6d069c3e821e0aef3";
+  const ADMIN_ADDRESS = "0x1109c5BB8Abb99Ca3BBeff6E60F5d3794f4e0473"; // admin address on harmony mainnet
+  const PLUTUS_ADDRESS = "0xd32858211fcefd0be0dd3fd6d069c3e821e0aef3"; // plutus address on harmony mainnet
+  const L3PLTSSWAPBANK_PHERMES_BALANCE = ethers.utils.parseEther('966930');
+  const TOKENREDEEM_HERMES_SUPPLY = ethers.utils.parseEther('1800000'); // ~1.8M tokens
 
   // read data from file.
   const jason = await csv({
@@ -41,8 +39,10 @@ async function main() {
   const L3PltsSwapGen = await hre.ethers.getContractFactory("L3PltsSwapGen");
   const L3HermesTokenRedeem = await hre.ethers.getContractFactory("L3HermesTokenRedeem");
 
-  const plutus = await Plutus.attach(PLUTUS_ADDRESS);
-  const pHermes = await PreHermes.deploy();
+  // deploy tokens
+
+  const plutus = await Plutus.attach(PLUTUS_ADDRESS); // should already exist on chain, so attach to it
+  const pHermes = await PreHermes.deploy(deployer.address);
   const hermes = await Hermes.deploy();
 
   await pHermes.deployed();
@@ -51,30 +51,63 @@ async function main() {
   console.log("pHermes deployed to:", pHermes.address);
   console.log("Hermes deployed to:", hermes.address);
 
-  currentBlock = await hre.ethers.provider.getBlockNumber() + 2;
-  const l3PltsSwapBank = await L3PltsSwapBank.deploy(currentBlock, PLUTUS_ADDRESS, pHermes.address);
+  // deploy contracts
+
+  currentBlock = await hre.ethers.provider.getBlockNumber() + 2; // set start block to the second next block
+  const l3PltsSwapBank = await L3PltsSwapBank.deploy(currentBlock, PLUTUS_ADDRESS, pHermes.address);  // TODO: update start block to correct value when deploying.
   await l3PltsSwapBank.deployed();
   console.log("l3PltsSwapBank deployed to:", l3PltsSwapBank.address);
 
-  currentBlock = await hre.ethers.provider.getBlockNumber() + 2;
-  const l3PltsSwapGen = await L3PltsSwapGen.deploy(currentBlock, PLUTUS_ADDRESS, pHermes.address);
+  currentBlock = await hre.ethers.provider.getBlockNumber() + 2; // set start block to the second next block
+  const l3PltsSwapGen = await L3PltsSwapGen.deploy(currentBlock, PLUTUS_ADDRESS, pHermes.address); // TODO: update start block to correct value when deploying.
   await l3PltsSwapGen.deployed();
   console.log("l3PltsSwapGen deployed to:", l3PltsSwapGen.address);
 
-  currentBlock = await hre.ethers.provider.getBlockNumber() + 2;
-  const l3HermesTokenRedeem = await L3HermesTokenRedeem.deploy(currentBlock, l3PltsSwapBank.address, l3PltsSwapGen.address, pHermes.address, hermes.address);
+  currentBlock = await hre.ethers.provider.getBlockNumber() + 2; // set start block to the second next block
+  const l3HermesTokenRedeem = await L3HermesTokenRedeem.deploy(currentBlock, l3PltsSwapBank.address, l3PltsSwapGen.address, pHermes.address, hermes.address); // TODO: update start block to correct value when deploying.
   await l3HermesTokenRedeem.deployed();
   console.log("l3HermesTokenRedeem deployed to:", l3HermesTokenRedeem.address);
 
   // whitelist users
 
-  for (var i = 0; i < jason.length; i++) {
+  // for (var i = 0; i < jason.length; i++) {
 
-    var obj = jason[i];
-    await l3PltsSwapBank.whitelistUser(obj["address"], hre.ethers.utils.parseEther(obj["amount"]));
+  //   var obj = jason[i];
+  //   await l3PltsSwapBank.whitelistUser(obj["address"], hre.ethers.utils.parseEther(obj["amount"]));
 
-  }
+  // }
 
+  // TODO: fund bank and gen contracts with pHERMES
+
+  // transfer pHERMES to l3PlutusSwapBank
+  console.log("phermes total suply", await pHermes.totalSupply());
+  await pHermes.transfer(l3PltsSwapBank.address, L3PLTSSWAPBANK_PHERMES_BALANCE);
+  console.log("l3PltsSwapBank phermes amount:", await pHermes.balanceOf(l3PltsSwapBank.address))
+
+  // transfer pHERMES to l3PlutusSwapGen
+  const amountToSend = await pHermes.balanceOf(deployer.address);
+  await pHermes.transfer(l3PltsSwapGen.address, amountToSend);
+  console.log("l3PltsSwapGen phermes amount:", await pHermes.balanceOf(l3PltsSwapGen.address))
+
+  // mint HERMES to L3HermesTokenRedeem
+  await hermes.mint(l3HermesTokenRedeem.address, TOKENREDEEM_HERMES_SUPPLY)
+  console.log("tokenRedeem HERMES balance", await hermes.balanceOf(l3HermesTokenRedeem.address))
+  // add l3PlutusSwapBank & l3PlutusSwapGen to plutus whitelist
+
+  //TODO: // transfer ownership after deployment
+  await pHermes.transferOwnership(ADMIN_ADDRESS);
+  await hermes.transferOwnership(ADMIN_ADDRESS);
+  await l3PltsSwapBank.transferOwnership(ADMIN_ADDRESS);
+  await l3PltsSwapGen.transferOwnership(ADMIN_ADDRESS);
+  await l3HermesTokenRedeem.transferOwnership(ADMIN_ADDRESS);
+
+
+  console.log("phermes owner", await pHermes.owner())
+  console.log("hermes owner", await hermes.owner())
+  console.log("l3PltsSwapBank owner", await l3PltsSwapBank.owner())
+  console.log("l3PltsSwapGen owner", await l3PltsSwapGen.owner())
+  console.log("l3HermesTokenRedeem owner", await l3HermesTokenRedeem.owner())
+  console.log("admin addr:", ADMIN_ADDRESS)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
