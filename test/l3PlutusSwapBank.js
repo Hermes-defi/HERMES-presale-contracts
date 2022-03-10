@@ -8,7 +8,7 @@ describe('L3PlutusSwapBank Contract Test', function () {
     let whiteListedAmount;
 
     const PLUTUS_SUPPLY = ethers.utils.parseEther('714285.7143'); // ~700k tokens
-    const PHERMES_SUPPLY = ethers.utils.parseEther('1811855'); // ~1M tokens
+    const PHERMES_SUPPLY = ethers.utils.parseEther('966930'); // ~966k tokens
 
 
     const PRESALE_START_BLOCK = 7000;

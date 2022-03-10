@@ -18,9 +18,9 @@ contract L3PltsSwapGen is Ownable, ReentrancyGuard {
 
     address public immutable preHermesAddress;
 
-    uint256 public constant PLTS_SWAP_PRESALE_SIZE = 1635714286 * (10**15); // 1,635,714.286 amount of PLTS expected to be swapped?
+    uint256 public constant PLTS_SWAP_PRESALE_SIZE = 1635714286 * (10**15); // 1,635,714.286 amount of PLTS expected to be swapped? //TODO: adjust this value before deploy
 
-    uint256 public preHermesSaleINVPriceE35 = 4585152838 * (10**25); // this price (pHRMS/PLTS) stays fixed during the sale.
+    uint256 public preHermesSaleINVPriceE35 = 4585152838 * (10**25); // this price (pHRMS/PLTS) stays fixed during the sale. //TODO: adjust this value before deploy
 
     uint256 public preHermesMaximumAvailable =
         (PLTS_SWAP_PRESALE_SIZE * preHermesSaleINVPriceE35) / 1e35; // max amount of presale Dakside tokens available to swap
