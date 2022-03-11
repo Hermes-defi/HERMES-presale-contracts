@@ -54,12 +54,12 @@ async function main() {
   // deploy contracts
 
   currentBlock = await hre.ethers.provider.getBlockNumber() + 2; // set start block to the second next block
-  const l3PltsSwapBank = await L3PltsSwapBank.deploy(currentBlock, PLUTUS_ADDRESS, pHermes.address);  // TODO: update start block to correct value when deploying.
+  const l3PltsSwapBank = await L3PltsSwapBank.deploy(currentBlock, plutus.address, pHermes.address);  // TODO: update start block to correct value when deploying.
   await l3PltsSwapBank.deployed();
   console.log("l3PltsSwapBank deployed to:", l3PltsSwapBank.address);
 
   currentBlock = await hre.ethers.provider.getBlockNumber() + 2; // set start block to the second next block
-  const l3PltsSwapGen = await L3PltsSwapGen.deploy(currentBlock, PLUTUS_ADDRESS, pHermes.address); // TODO: update start block to correct value when deploying.
+  const l3PltsSwapGen = await L3PltsSwapGen.deploy(currentBlock, plutus.address, pHermes.address); // TODO: update start block to correct value when deploying.
   await l3PltsSwapGen.deployed();
   console.log("l3PltsSwapGen deployed to:", l3PltsSwapGen.address);
 
@@ -77,7 +77,7 @@ async function main() {
 
   }
 
-  
+
   // transfer pHERMES to l3PlutusSwapBank
   console.log("phermes total suply", await pHermes.totalSupply());
   await pHermes.transfer(l3PltsSwapBank.address, L3PLTSSWAPBANK_PHERMES_BALANCE);
@@ -91,7 +91,7 @@ async function main() {
   // mint HERMES to L3HermesTokenRedeem
   await hermes.mint(l3HermesTokenRedeem.address, TOKENREDEEM_HERMES_SUPPLY)
   console.log("tokenRedeem HERMES balance", await hermes.balanceOf(l3HermesTokenRedeem.address))
-  
+
   // add l3PlutusSwapBank & l3PlutusSwapGen to plutus whitelist
 
   // transfer ownership after deployment
