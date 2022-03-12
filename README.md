@@ -1,6 +1,13 @@
 # PLTS to HRMS migration
 This repo contains the contracts and accompanying test needed to launch the presale of the Hermes token.
 
+## How it works
+- owner adds `l3PltsSwapBank` & `l3PltsSwapGen` to `Plutus` whitelisted accounts
+- Plutus owner sends `PLTS` to user accounts that will test presale contracts
+- swap plutus for prehermes in  `l3PltsSwapBank` or `l3PltsSwapGen` using `swapPltsForPresaleTokensL3( uint amount )` 
+- swap prehermes for hermes in `l3HermesTokenRedeem` using `swapPreHermesForHermes( uint amount )`
+- When presale ends owner can claim all `PLTS` in presale contracts using `sendDepreciatedPltsToFeeAddress()`
+- when presale ends owner can collect any unclaimed `hermes` from redeem contract
 
 ## Setup
 `yarn install` once the repo is cloned to install all dependencies.
@@ -60,6 +67,41 @@ run `yarn start` in your terminal to start your local blockchain env. this will 
 `yarn deploy-testnet` to run the deploy script and deploy all the  necessary contracts.
 ### Harmony Mainnet Deployment
 `yarn deploy-mainnet` to run the deploy script and deploy all the  necessary contracts.
+### Deployment Process Flow
+- collect data on bank users
+- create PHERMES contract
+- send PHERMES to L3HermesBankSwap contracts.  [See link for details.](https://docs.google.com/spreadsheets/d/1mVKGZvjQubqxeaCxpBVMVaDMDoCVSEN8/edit#gid=1817589439) 
+- send PHERMES to L3HermesRegSwap contracts.  [See link for details.](https://docs.google.com/spreadsheets/d/1mVKGZvjQubqxeaCxpBVMVaDMDoCVSEN8/edit#gid=1817589439) 
+- create HERMES contract 
+- update L3HermesBankSwap & L3HermesRegSwap with latest PLTS token data.
+- deploy  L3HermesBankSwap & L3HermesRegSwap contracts
+- deploy  l3HermesTokenRedeem contracts
+- mint HERMES to l3HermesTokenRedeem contract.  [See link for details.](https://docs.google.com/spreadsheets/d/1mVKGZvjQubqxeaCxpBVMVaDMDoCVSEN8/edit#gid=1817589439)
+- whitelist users for the L3HermesBankSwap contracts using collected data.
+- add L3HermesBankSwap contracts to PLTS whitelist
+- add L3HermesRegSwap contracts to PLTS whitelist
+- transfer all ownership to admin/fee address
+
+
+
+### Bank users swap contract 
+- `Max pHermes distributed:  966,929.57 `
+- `Max PLTS to swap:  1,462,790.89  * (10**18)`
+- `INV Price: 1486595745 * 10^16`
+- `presale duration: 117360 blocks`
+- whitelist bank users
+
+### General public swap contract
+- `Max hermes distriuted to token holders: 833,070.43`
+- `Max PLTS to swap: 1,487,209.11  * (10**18)`
+- `INV Price: 1635714286 * 10^15  `
+- `presale duration: 117360 blocks`
+
+
+### Redeem token contract
+- swap PHERMES for HERMES at 1:1 ratio.
+- set start block
+
 
 ## Contract ABI
 
