@@ -100,10 +100,11 @@ describe('L3PlutusSwapGen Contract Test', function () {
 
     });
 
-    it("Max pHermes available should equal 750,000 after changing the sale price to 0.4585152838 (pl3/l2) ", async function () {
+    it("Max pHermes available should equal 833,070.43 after changing the sale price to 0.5601568549 (pl3/l2) ", async function () {
+        //TODO: adjust test to mathc final price
+        const pHermesPrice = ethers.utils.parseEther('56015685490000000');
+        const max_pHermes = ethers.utils.parseEther('833070.43');
 
-        const pHermesPrice = ethers.utils.parseEther('45851528380000000');
-        const max_pHermes = ethers.utils.parseEther('750000');
         const delta = ethers.utils.parseEther('0.1');
 
         // get curent max available
@@ -143,9 +144,10 @@ describe('L3PlutusSwapGen Contract Test', function () {
         await expect(this.l3PlutusSwap.setSaleINVPriceE35(pHermesPrice)).to.be.revertedWith("cannot change price 4 hours before start block");
     });
 
-    it("All user should receive ~0.45 pHermes after swapping 1 Plutus", async function () {
-
-        const plutusReceived = '458515283800000000';
+    it("All user should receive ~0.56 pHermes after swapping 1 Plutus", async function () {
+        //TODO: adjust price ratio
+        const plutusReceived = '560156854900000000';
+       
         // increment block
         const currentBlock = await ethers.provider.getBlockNumber();
         assert.equal(await this.pHermes.balanceOf(alice.address), '0');
