@@ -75,4 +75,26 @@ describe("Hermes", function () {
             await expect(hermes.mint(alice.address, '500')).to.be.revertedWith("ERC20Capped: cap exceeded")
         });
     });
+    describe("when ownership is transferred", () => {
+
+        beforeEach("transfer ownership", async () => {
+            await hermes.transferOwnership(alice.address);
+        });
+
+        it("alice should be new owner", async () => {
+
+            expect((await hermes.owner())).to.be.equal(alice.address);
+        });
+
+        it("deployer should not be able to revoke roles", async () => {
+
+            await expect(hermes.connect(deployer).revokeMinterRole(charlie.address)).to.be.reverted;
+        });
+        it("alice should be able to revoke roles", async () => {
+
+            await expect(hermes.connect(alice).revokeMinterRole(charlie.address)).to.not.be.reverted;
+        });
+    });
+
+
 });

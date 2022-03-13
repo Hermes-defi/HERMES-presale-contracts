@@ -10,14 +10,16 @@
     "test:l3PltsSwapGen": "hardhat test test/l3PlutusSwapGen.js",
     "test:l3HermesTokenRedeem": "hardhat test test/l3HermesTokenRedeem.js",
     "compile": "hardhat compile",
-    "deploy-mainnet": "truffle migrate --reset --network harmony",
-    "deploy-testnet": "truffle migrate --reset --network harmonyTestnet"
+    "deploy-local": "hardhat run scripts/testnet-deploy.js --network localhost",
+    "deploy-mainnet": "hardhat run scripts/deploy.js --network harmony",
+    "deploy-testnet": "hardhat run scripts/testnet-deploy.js --network harmonyTestnet"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
     "@nomiclabs/hardhat-etherscan": "^3.0.0",
     "@nomiclabs/hardhat-waffle": "^2.0.0",
     "chai": "^4.2.0",
+    "csvtojson": "^2.0.10",
     "dotenv": "^10.0.0",
     "eslint": "^7.29.0",
     "eslint-config-prettier": "^8.3.0",
