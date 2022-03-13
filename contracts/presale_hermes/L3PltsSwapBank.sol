@@ -56,7 +56,9 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
     constructor(
         uint256 _startBlock,
         address _plutusAddress,
-        address _preHermesAddress
+        address _preHermesAddress,
+        address[] memory _accounts,
+        uint256[] memory _amounts
     ) {
         require(
             block.number < _startBlock,
@@ -81,6 +83,8 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
 
         preHermesAddress = _preHermesAddress;
         plutusAddress = _plutusAddress;
+
+        _whiteListAccounts(_accounts, _amounts);
     }
 
     /// @dev requires that users be whiteListed to execute functions
@@ -254,5 +258,18 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
     /// @notice check the max plts allowed to swap.
     function swapAllowance(address _account) public view returns (uint256) {
         return whitelisted[_account].allowance;
+    }
+
+    /// @dev whitelist users on contract creation
+    /// @param _accounts list of user accounts
+    /// @param _amounts list of user amounts
+    function _whiteListAccounts(
+        address[] memory _accounts,
+        uint256[] memory _amounts
+    ) private {
+        require(_accounts.length == _amounts.length, "length mismatch");
+        for (uint256 i = 0; i < _accounts.length; i++) {
+            whitelistUser(_accounts[i], _amounts[i]);
+        }
     }
 }

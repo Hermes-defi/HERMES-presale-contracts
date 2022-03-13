@@ -6,6 +6,9 @@ describe('L3PlutusSwapBank Contract Test', function () {
     let deployer, alice, bob, charlie, david, attacker;
     let users;
     let whiteListedAmount;
+    let amountList = [];
+    let userAddrList = [];
+
 
     const PLUTUS_SUPPLY = ethers.utils.parseEther('714285.7143'); // ~700k tokens
     const PHERMES_SUPPLY = ethers.utils.parseEther('966930'); // ~966k tokens
@@ -13,10 +16,14 @@ describe('L3PlutusSwapBank Contract Test', function () {
 
     const PRESALE_START_BLOCK = 7000;
     const PRESALE_END_BLOCK = PRESALE_START_BLOCK + 117360;
+    whiteListedAmount = ethers.utils.parseEther('500');
+    bobAmount = ethers.utils.parseEther('1000');
+
     before(async function () {
 
         [deployer, alice, bob, charlie, david, attacker] = await ethers.getSigners();
         users = [alice, bob, charlie, david];
+        amountList=[whiteListedAmount,bobAmount,whiteListedAmount,whiteListedAmount]
 
         const L3PlutusSwapFactory = await ethers.getContractFactory('L3PltsSwapBank', deployer);
         const ERC20Factory = await ethers.getContractFactory('MockERC20', deployer);
@@ -25,25 +32,39 @@ describe('L3PlutusSwapBank Contract Test', function () {
         // deploy contracts
         this.plutus = await ERC20Factory.deploy("Plutus", "PLTS", PLUTUS_SUPPLY);
         this.pHermes = await PhermesFactory.deploy(deployer.address);
-        this.l3PlutusSwapBank = await L3PlutusSwapFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address);
+
+        // create list for whitelisting
+        for (let i = 0; i < users.length; i++) {
+
+           
+
+            userAddrList.push(users[i].address)
+        //    amountList.push(whiteListedAmount) 
+        }
+
+        this.l3PlutusSwapBank = await L3PlutusSwapFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address, userAddrList, amountList);
 
 
         // fund users account with 1000 plutus each
 
         for (let i = 0; i < users.length; i++) {
-            const walletBalance = ethers.utils.parseEther('1000');
-            whiteListedAmount = ethers.utils.parseEther('500');
+            const walletBalance = ethers.utils.parseEther('10000');
+            // whiteListedAmount = ethers.utils.parseEther('500');
 
             await this.plutus.transfer(users[i].address, walletBalance);
             await this.plutus.connect(users[i]).approve(this.l3PlutusSwapBank.address, walletBalance);
-
+            userAddrList.push(users[i].address)
+            // userAddrList.push(user[i].address)
             // whitelist bank users
-            await this.l3PlutusSwapBank.whitelistUser(users[i].address, whiteListedAmount);
+            // await this.l3PlutusSwapBank.whitelistUser(users[i].address, whiteListedAmount);
 
             expect(
                 await this.plutus.balanceOf(users[i].address)
             ).to.be.eq(walletBalance);
         }
+
+
+
         // fund attacker account
         const attackerBalance = ethers.utils.parseEther('1000');
         await this.plutus.transfer(attacker.address, attackerBalance);
@@ -56,6 +77,12 @@ describe('L3PlutusSwapBank Contract Test', function () {
         expect(
             await this.pHermes.balanceOf(this.l3PlutusSwapBank.address)
         ).to.be.eq(PHERMES_SUPPLY);
+    });
+
+    it("Bob allowance should be 1000.", async function () {
+        const amount = ethers.utils.parseEther('1000');
+        const bobAllowance = await this.l3PlutusSwapBank.connect(bob).swapAllowance(bob.address);
+        expect(bobAllowance).to.be.eq(amount);
     });
 
     it("Should revert because presale did not start.", async function () {
@@ -184,13 +211,14 @@ describe('L3PlutusSwapBank Contract Test', function () {
 
         expect(
             await this.pHermes.balanceOf(alice.address)
-        ).to.be.eq(await this.pHermes.balanceOf(bob.address));
+        ).to.be.eq(await this.pHermes.balanceOf(charlie.address));
 
         expect(await this.pHermes.balanceOf(alice.address)).to.be.closeTo(pHermesReceived, delta);
 
         expect(
             await this.plutus.balanceOf(alice.address)
-        ).to.be.eq(ethers.utils.parseEther('999'));
+        ).to.be.eq(ethers.utils.parseEther('9999'));
+     
     });
 
     it("Users should have their allowance decreased by 1 PLTS", async function () {
