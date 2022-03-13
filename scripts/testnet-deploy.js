@@ -10,12 +10,15 @@ const csv = require('csvtojson');
 async function main() {
 
 
+  let userlist = [];
+  let userAmounts = [];
+
   var absolutePath = path.resolve("./scripts/addresses-merged.csv");
 
 
   let currentBlock;
   const [deployer] = await ethers.getSigners();
-  const ADMIN_ADDRESS = "0x1109c5BB8Abb99Ca3BBeff6E60F5d3794f4e0473"; // admin address on harmony mainnet
+  const ADMIN_ADDRESS = "0x7cef2432A2690168Fb8eb7118A74d5f8EfF9Ef55"; // admin address on harmony mainnet
   const L3PLTSSWAPBANK_PHERMES_BALANCE = ethers.utils.parseEther('966930');
   const TOKENREDEEM_HERMES_SUPPLY = ethers.utils.parseEther('1800000'); // ~1.8M tokens
 
@@ -25,6 +28,16 @@ async function main() {
     headers: ['address', 'amount', 'ratio', 'timestamp']
   })
     .fromFile(absolutePath);
+
+  // generate user address & amount list
+  for (var i = 0; i < jason.length; i++) {
+
+    var obj = jason[i];
+    userlist.push(obj["address"]);
+    userAmounts.push(hre.ethers.utils.parseEther(obj["amount"]));
+
+  }
+
 
   console.log("Deploying contracts with the account:", deployer.address);
   console.log("Account balance:", (await deployer.getBalance()).toString());
@@ -40,7 +53,8 @@ async function main() {
 
   // deploy tokens
 
-  const plutus = await Plutus.deploy();
+
+  const plutus = Plutus.attach("0x540c84a79F64ebC81636dB7FB0adf31D26a9b2FD");
   const pHermes = await PreHermes.deploy(deployer.address);
   const hermes = await Hermes.deploy();
 
@@ -53,7 +67,7 @@ async function main() {
   // deploy contracts
 
   currentBlock = await hre.ethers.provider.getBlockNumber() + 200; // set start block to the second next block
-  const l3PltsSwapBank = await L3PltsSwapBank.deploy(currentBlock, plutus.address, pHermes.address);
+  const l3PltsSwapBank = await L3PltsSwapBank.deploy(currentBlock, plutus.address, pHermes.address, userlist, userAmounts);
   await l3PltsSwapBank.deployed();
   console.log("l3PltsSwapBank deployed to:", l3PltsSwapBank.address);
 
@@ -66,16 +80,6 @@ async function main() {
   const l3HermesTokenRedeem = await L3HermesTokenRedeem.deploy(currentBlock, l3PltsSwapBank.address, l3PltsSwapGen.address, pHermes.address, hermes.address);
   await l3HermesTokenRedeem.deployed();
   console.log("l3HermesTokenRedeem deployed to:", l3HermesTokenRedeem.address);
-
-  // whitelist users
-
-  for (var i = 0; i < jason.length; i++) {
-
-    var obj = jason[i];
-    await l3PltsSwapBank.whitelistUser(obj["address"], hre.ethers.utils.parseEther(obj["amount"]));
-    console.log('added userInfo', i);
-
-  }
 
 
   // transfer pHERMES to l3PlutusSwapBank
