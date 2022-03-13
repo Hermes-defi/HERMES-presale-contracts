@@ -13,7 +13,7 @@ contract L3HermesTokenRedeem is Ownable, ReentrancyGuard {
         0x000000000000000000000000000000000000dEaD;
 
     address public constant FEE_ADDRESS =
-        0x1109c5BB8Abb99Ca3BBeff6E60F5d3794f4e0473;
+        0x7cef2432A2690168Fb8eb7118A74d5f8EfF9Ef55;
 
     address public immutable preHermesAddress;
 

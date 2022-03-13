@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 /// Any remaining presale tokens stays in this contract after pre-sale ends.
 contract L3PltsSwapGen is Ownable, ReentrancyGuard {
     address public constant FEE_ADDRESS =
-        0x1109c5BB8Abb99Ca3BBeff6E60F5d3794f4e0473;
+        0x7cef2432A2690168Fb8eb7118A74d5f8EfF9Ef55;
 
     address public immutable plutusAddress;
 
