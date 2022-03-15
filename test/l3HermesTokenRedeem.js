@@ -1,5 +1,5 @@
 const { ethers, network } = require('hardhat');
-const { expect, assert } = require('chai');
+const { expect } = require('chai');
 
 describe('L3TokenRedeem Contract Test', function () {
     this.timeout(0); // this is important toprevent timeout when increasing blocks.
@@ -29,14 +29,11 @@ describe('L3TokenRedeem Contract Test', function () {
         // deploy contracts
         this.plutus = await ERC20Factory.deploy("Plutus", "PLTS", PLUTUS_SUPPLY);
         this.pHermes = await PhermesFactory.deploy(deployer.address);
-        // this.pHermes = await PhermesFactory.deploy("pHermes", "pHRMS", PHERMES_SUPPLY);
-        // this.hermes = await HERMESFactory.deploy("Hermes", "HRMS", HERMES_SUPPLY);
         this.hermes = await HERMESFactory.deploy();
 
 
-        this.l3PltsSwapBank = await L3PltsSwapBankFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address);
+        this.l3PltsSwapBank = await L3PltsSwapBankFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address, [], []);
         this.l3PltsSwapGen = await L3PltsSwapGenFactory.deploy(PRESALE_START_BLOCK, this.plutus.address, this.pHermes.address);
-
         this.l3TokenRedeem = await L3TokenRedeemFactory.deploy(REDEEM_START_BLOCK, this.l3PltsSwapBank.address, this.l3PltsSwapGen.address, this.pHermes.address, this.hermes.address);
 
 
@@ -106,8 +103,7 @@ describe('L3TokenRedeem Contract Test', function () {
             await this.l3TokenRedeem.connect(users[i]).swapPreHermesForHermes(pHermesBalance);
         }
 
-        const burnAmount = ethers.utils.parseEther('1.8340611352');
-        // await this.l3TokenRedeem.connect(alice).swapPreHermesForHermes(amount);
+        const burnAmount = ethers.utils.parseEther('2.2406274196');
 
         // expect pHrms balance to be zero
         expect(await this.pHermes.balanceOf(alice.address)).to.be.eq('0');
