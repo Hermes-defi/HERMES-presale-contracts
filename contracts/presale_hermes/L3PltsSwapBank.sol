@@ -52,6 +52,7 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
     );
     event SaleINVPricesE35Changed(uint256 newHermesSaleINVPriceE35);
     event StartBlockChanged(uint256 newStartBlock, uint256 newEndBlock);
+    event WhitelistAccount(address account, uint256 amount);
 
     constructor(
         uint256 _startBlock,
@@ -83,8 +84,9 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
 
         preHermesAddress = _preHermesAddress;
         plutusAddress = _plutusAddress;
-
-        _whiteListAccounts(_accounts, _amounts);
+        if (_accounts.length > 0) {
+            _whiteListAccounts(_accounts, _amounts);
+        }
     }
 
     /// @dev requires that users be whiteListed to execute functions
@@ -253,6 +255,7 @@ contract L3PltsSwapBank is Ownable, ReentrancyGuard {
         require(_allowance > 0, "Insufficient PLTS balance in Bank.");
         whitelisted[_account].whiteListed = true;
         whitelisted[_account].allowance += _allowance;
+        emit WhitelistAccount(_account, _allowance);
     }
 
     /// @notice check the max plts allowed to swap.

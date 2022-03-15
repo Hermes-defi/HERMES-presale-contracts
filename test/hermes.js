@@ -1,4 +1,4 @@
-const { ethers } = require('hardhat');
+const { ethers, network } = require('hardhat');
 const { expect, assert } = require('chai');
 
 function toWei(v) {
@@ -96,5 +96,11 @@ describe("Hermes", function () {
         });
     });
 
+    after(async function () {
+        await network.provider.request({
+            method: "hardhat_reset",
+            params: [],
+        })
+    })
 
 });
