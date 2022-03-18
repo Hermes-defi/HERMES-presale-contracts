@@ -9,6 +9,7 @@ const csv = require('csvtojson');
 
 async function main() {
 
+
   let userlist = [];
   let userAmounts = [];
 
@@ -18,7 +19,6 @@ async function main() {
   let currentBlock;
   const [deployer] = await ethers.getSigners();
   const ADMIN_ADDRESS = "0x7cef2432A2690168Fb8eb7118A74d5f8EfF9Ef55"; // admin address on harmony mainnet
-  const PLUTUS_ADDRESS = "0xd32858211fcefd0be0dd3fd6d069c3e821e0aef3"; // plutus address on harmony mainnet
   const L3PLTSSWAPBANK_PHERMES_BALANCE = ethers.utils.parseEther('966930');
   const TOKENREDEEM_HERMES_SUPPLY = ethers.utils.parseEther('1800000'); // ~1.8M tokens
 
@@ -38,12 +38,13 @@ async function main() {
 
   }
 
+
   console.log("Deploying contracts with the account:", deployer.address);
   console.log("Account balance:", (await deployer.getBalance()).toString());
   console.log("block number:", await hre.ethers.provider.getBlockNumber());
 
   // We get the contract to deploy
-  const Plutus = await hre.ethers.getContractFactory("MockERC20");
+  const Plutus = await hre.ethers.getContractFactory("Plutus");
   const PreHermes = await hre.ethers.getContractFactory("PreHermes");
   const Hermes = await hre.ethers.getContractFactory("Hermes");
   const L3PltsSwapBank = await hre.ethers.getContractFactory("L3PltsSwapBank");
@@ -52,7 +53,8 @@ async function main() {
 
   // deploy tokens
 
-  const plutus = Plutus.attach(PLUTUS_ADDRESS); // should already exist on chain, so attach to it
+
+  const plutus = Plutus.attach("0x540c84a79F64ebC81636dB7FB0adf31D26a9b2FD");
   const pHermes = await PreHermes.deploy(deployer.address);
   const hermes = await Hermes.deploy();
 
@@ -64,22 +66,20 @@ async function main() {
 
   // deploy contracts
 
-  currentBlock = await hre.ethers.provider.getBlockNumber() + 2; // set start block to the second next block
-  const l3PltsSwapBank = await L3PltsSwapBank.deploy(currentBlock, plutus.address, pHermes.address, userlist, userAmounts);  // TODO: update start block to correct value when deploying.
+  currentBlock = await hre.ethers.provider.getBlockNumber() + 200; // set start block to the second next block
+  const l3PltsSwapBank = await L3PltsSwapBank.deploy(currentBlock, plutus.address, pHermes.address, userlist, userAmounts);
   await l3PltsSwapBank.deployed();
   console.log("l3PltsSwapBank deployed to:", l3PltsSwapBank.address);
 
-  currentBlock = await hre.ethers.provider.getBlockNumber() + 2; // set start block to the second next block
-  const l3PltsSwapGen = await L3PltsSwapGen.deploy(currentBlock, plutus.address, pHermes.address); // TODO: update start block to correct value when deploying.
+  currentBlock = await hre.ethers.provider.getBlockNumber() + 200; // set start block to the second next block
+  const l3PltsSwapGen = await L3PltsSwapGen.deploy(currentBlock, plutus.address, pHermes.address);
   await l3PltsSwapGen.deployed();
   console.log("l3PltsSwapGen deployed to:", l3PltsSwapGen.address);
 
-  currentBlock = await hre.ethers.provider.getBlockNumber() + 2; // set start block to the second next block
-  const l3HermesTokenRedeem = await L3HermesTokenRedeem.deploy(currentBlock, l3PltsSwapBank.address, l3PltsSwapGen.address, pHermes.address, hermes.address); // TODO: update start block to correct value when deploying.
+  currentBlock = await hre.ethers.provider.getBlockNumber() + 200; // set start block to the second next block
+  const l3HermesTokenRedeem = await L3HermesTokenRedeem.deploy(currentBlock, l3PltsSwapBank.address, l3PltsSwapGen.address, pHermes.address, hermes.address);
   await l3HermesTokenRedeem.deployed();
   console.log("l3HermesTokenRedeem deployed to:", l3HermesTokenRedeem.address);
-
- 
 
 
   // transfer pHERMES to l3PlutusSwapBank
@@ -99,6 +99,7 @@ async function main() {
   // add l3PlutusSwapBank & l3PlutusSwapGen to plutus whitelist
 
   // transfer ownership after deployment
+  await plutus.transferOwnership(ADMIN_ADDRESS);
   await pHermes.transferOwnership(ADMIN_ADDRESS);
   await hermes.transferOwnership(ADMIN_ADDRESS);
   await l3PltsSwapBank.transferOwnership(ADMIN_ADDRESS);
