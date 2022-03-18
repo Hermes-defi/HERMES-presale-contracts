@@ -11,6 +11,7 @@ This repo contains the contracts and accompanying test needed to launch the pres
 
 ## Setup
 `yarn install` once the repo is cloned to install all dependencies.
+add `addresses-merged.csv` in your scripts folder. Check [this repo](https://github.com/Hermes-defi/block-scanner) on how to generate the list of addresses
 
 ## Test
 `yarn test:hermes` to run test for hermes token contract.
@@ -58,15 +59,18 @@ This repo contains the contracts and accompanying test needed to launch the pres
 - set start block
 
 ## Deployment
+
 ### Local Testnet Deployment
-run `yarn start` in your terminal to start your local blockchain env. this will require that `ganache-cli` is installed globally on your machine.
+run `yarn start` in your terminal to start your local blockchain env. This will require that `ganache-cli` is installed globally on your machine.
 
 `yarn deploy-local` to run the deploy script and deploy all the  necessary contracts.
 
 ### Harmony Testnet Deployment
 `yarn deploy-testnet` to run the deploy script and deploy all the  necessary contracts.
+
 ### Harmony Mainnet Deployment
 `yarn deploy-mainnet` to run the deploy script and deploy all the  necessary contracts.
+
 ### Deployment Process Flow
 - collect data on bank users
 - create PHERMES contract
