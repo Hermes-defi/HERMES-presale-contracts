@@ -18,7 +18,7 @@ This repo contains the contracts and accompanying test needed to launch the pres
 `yarn test:l3PltsSwapGen` to run test for l3PltsSwapGen contract.
 `yarn test:l3HermesTokenRedeem` to run test for l3HermesTokenRedeem contract.
 
-`yarn hardhat test` to run all test. This can take a while.
+`yarn test` to run all test. This can take a while.
 
 
 
