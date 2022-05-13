@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.0;
-
+import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -121,6 +121,9 @@ contract L3PltsSwapGen is Ownable, ReentrancyGuard {
             preHermesPurchaseAmount > 0,
             "user cannot purchase 0 preHermes"
         );
+
+        console.log('preHermesPurchaseAmount', preHermesPurchaseAmount);
+        console.log('preHermesAddress', IERC20(preHermesAddress).balanceOf(address(this)) );
 
         // shouldn't be possible to fail these asserts.
         assert(preHermesPurchaseAmount <= preHermesRemaining);

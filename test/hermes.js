@@ -1,8 +1,8 @@
-const { ethers, network } = require('hardhat');
-const { expect, assert } = require('chai');
+const {ethers, network} = require('hardhat');
+const {expect, assert} = require('chai');
 
 function toWei(v) {
-    return ethers.utils.parseUnits(v, 18).toString();
+    return ethers.utils.parseUnits(v, 'gwei').toString();
 }
 
 describe("Hermes", function () {
@@ -27,32 +27,32 @@ describe("Hermes", function () {
         });
 
         it("should mint when user with minter role tries to mint", async () => {
-            const mintAmount = ethers.utils.parseEther('10');
+            const mintAmount = toWei('10');
             await hermes.connect(charlie).mint(charlie.address, mintAmount);
             const charlieBalance = await hermes.balanceOf(charlie.address);
             expect(charlieBalance).to.be.eq(mintAmount)
         });
         it("should revert when non minter role tries to mint", async () => {
-            const mintAmount = ethers.utils.parseEther('10');
+            const mintAmount = toWei('10');
             await expect(hermes.connect(alice).mint(alice.address, mintAmount)).to.be.reverted;
         });
     });
     describe("when Burner roles are required", () => {
 
         beforeEach("give Burner role to charlie", async () => {
-            transferAmount = await ethers.utils.parseEther('10');
+            transferAmount = await toWei('10');
             await hermes.mint(alice.address, transferAmount);
             await hermes.grantBurnerRole(charlie.address);
         });
 
         it("should burn when user with burner role tries to burn", async () => {
-            const burnAmount = ethers.utils.parseEther('10');
+            const burnAmount = toWei('10');
             await hermes.connect(charlie).burn(alice.address, burnAmount);
             const aliceBalance = await hermes.balanceOf(alice.address);
             expect(aliceBalance).to.be.eq('0')
         });
         it("should revert when non burner role tries to burn", async () => {
-            const burnAmount = ethers.utils.parseEther('10');
+            const burnAmount = toWei('10');
             await expect(hermes.connect(alice).burn(alice.address, burnAmount)).to.be.reverted;
         });
     });

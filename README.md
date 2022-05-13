@@ -111,6 +111,7 @@ run `yarn start` in your terminal to start your local blockchain env. This will 
 
 ### pHermes
 This contract is the hermes presale token.
+```json
 "abi": [
     {
       "inputs": [],
@@ -771,10 +772,10 @@ This contract is the hermes presale token.
       "type": "function"
     }
   ]
-
+```
 ### l3PltsSwapBank
 This contract is the presale contract to be used by whitelisted bank users. It will swap PLTS for pHERMES at a predetermined ratio.
-
+```
 "abi": [
     {
       "inputs": [
@@ -1176,10 +1177,10 @@ This contract is the presale contract to be used by whitelisted bank users. It w
       "type": "function"
     }
   ],
-
+```
 ### l3PltsSwapGen
 This contract is the presale contract to be used all users. It will swap PLTS for pHERMES at a predetermined ratio. 
-
+```
  "abi": [
     {
       "inputs": [
@@ -1520,10 +1521,10 @@ This contract is the presale contract to be used all users. It will swap PLTS fo
       "type": "function"
     }
   ],
-
+```
 ### l3HermesTokenRedeem
 This contract is the redeem contract to be used all users to swappHermes for Hermes at a 1:1 ratio. 
-
+```
 "abi": [
     {
       "inputs": [
@@ -1791,7 +1792,7 @@ This contract is the redeem contract to be used all users to swappHermes for Her
       "type": "function"
     }
   ],
-
+```
 
 ## References
 - https://docs.google.com/spreadsheets/d/1kwgZ7iTl-ifZ917oVPL4K9X3yaHqQuKv/edit#gid=1355182352

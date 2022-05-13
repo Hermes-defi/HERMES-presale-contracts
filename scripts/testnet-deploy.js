@@ -99,7 +99,6 @@ async function main() {
   // add l3PlutusSwapBank & l3PlutusSwapGen to plutus whitelist
 
   // transfer ownership after deployment
-  await plutus.transferOwnership(ADMIN_ADDRESS);
   await pHermes.transferOwnership(ADMIN_ADDRESS);
   await hermes.transferOwnership(ADMIN_ADDRESS);
   await l3PltsSwapBank.transferOwnership(ADMIN_ADDRESS);
@@ -113,6 +112,7 @@ async function main() {
   console.log("l3PltsSwapGen owner", await l3PltsSwapGen.owner())
   console.log("l3HermesTokenRedeem owner", await l3HermesTokenRedeem.owner())
   console.log("admin addr:", ADMIN_ADDRESS)
+  await plutus.transferOwnership(ADMIN_ADDRESS);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

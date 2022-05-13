@@ -1,6 +1,8 @@
 const { ethers, network } = require('hardhat');
 const { expect } = require('chai');
-
+function toWei(v) {
+    return ethers.utils.parseUnits(v, 'gwei').toString();
+}
 describe('L3TokenRedeem Contract Test', function () {
     this.timeout(0); // this is important toprevent timeout when increasing blocks.
     let deployer, alice, bob, charlie, david, attacker;
@@ -8,7 +10,7 @@ describe('L3TokenRedeem Contract Test', function () {
 
     const PLUTUS_SUPPLY = ethers.utils.parseEther('2350000'); // 2.35M tokens
 
-    const HERMES_SUPPLY = ethers.utils.parseEther('1811855'); // 1.8M tokens
+    const HERMES_SUPPLY = toWei('1811855'); // 1.8M tokens
 
 
     const PRESALE_START_BLOCK = 50;
@@ -39,8 +41,8 @@ describe('L3TokenRedeem Contract Test', function () {
 
 
         // fund each presale contract with pHermes needed.
-        const bankAmount = ethers.utils.parseEther('966929.57');
-        const genAmount = ethers.utils.parseEther('833070.43');
+        const bankAmount = toWei('966929.57');
+        const genAmount = toWei('833070.43');
         await this.pHermes.transfer(this.l3PltsSwapBank.address, bankAmount);
         await this.pHermes.transfer(this.l3PltsSwapGen.address, genAmount);
 
