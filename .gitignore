@@ -3,9 +3,9 @@ node_modules
 coverage
 coverage.json
 typechain
-.DS_Store
-addresses-merged.csv
 
 #Hardhat files
 cache
 artifacts
+
+.idea

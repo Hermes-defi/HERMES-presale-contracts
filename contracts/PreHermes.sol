@@ -307,7 +307,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * {IERC20-balanceOf} and {IERC20-transfer}.
      */
     function decimals() public view virtual override returns (uint8) {
-        return 18;
+        return 9;
     }
 
     /**
@@ -424,9 +424,9 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         address owner = _msgSender();
         uint256 currentAllowance = allowance(owner, spender);
         require(currentAllowance >= subtractedValue, "ERC20: decreased allowance below zero");
-        unchecked {
-            _approve(owner, spender, currentAllowance - subtractedValue);
-        }
+    unchecked {
+        _approve(owner, spender, currentAllowance - subtractedValue);
+    }
 
         return true;
     }
@@ -457,9 +457,9 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
         uint256 fromBalance = _balances[from];
         require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
-        unchecked {
-            _balances[from] = fromBalance - amount;
-        }
+    unchecked {
+        _balances[from] = fromBalance - amount;
+    }
         _balances[to] += amount;
 
         emit Transfer(from, to, amount);
@@ -506,9 +506,9 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
         uint256 accountBalance = _balances[account];
         require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
-        unchecked {
-            _balances[account] = accountBalance - amount;
-        }
+    unchecked {
+        _balances[account] = accountBalance - amount;
+    }
         _totalSupply -= amount;
 
         emit Transfer(account, address(0), amount);
@@ -557,9 +557,9 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         uint256 currentAllowance = allowance(owner, spender);
         if (currentAllowance != type(uint256).max) {
             require(currentAllowance >= amount, "ERC20: insufficient allowance");
-            unchecked {
-                _approve(owner, spender, currentAllowance - amount);
-            }
+        unchecked {
+            _approve(owner, spender, currentAllowance - amount);
+        }
         }
     }
 
@@ -619,7 +619,7 @@ contract PreHermes is Ownable,ERC20("pHermes", "PHRMS") {
     constructor(address _deployerAddr) {
         _mint(
             address(_deployerAddr),
-            uint256(1800000 * (10**18)) // TODO update amount before deploy
+            uint256(1_800_000 gwei) // TODO update amount before deploy
         );
     }
 }

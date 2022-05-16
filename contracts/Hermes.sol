@@ -4,7 +4,7 @@
 
 // OpenZeppelin Contracts (last updated v4.6.0) (token/ERC20/IERC20.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -89,7 +89,7 @@ interface IERC20 {
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC20/extensions/IERC20Metadata.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 
 /**
@@ -119,7 +119,7 @@ interface IERC20Metadata is IERC20 {
 
 // OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 /**
  * @dev Interface of the ERC165 standard, as defined in the
@@ -147,7 +147,7 @@ interface IERC165 {
 
 // OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 
 /**
@@ -178,7 +178,7 @@ abstract contract ERC165 is IERC165 {
 
 // OpenZeppelin Contracts v4.4.1 (utils/Strings.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 /**
  * @dev String operations.
@@ -248,7 +248,7 @@ library Strings {
 
 // OpenZeppelin Contracts v4.4.1 (access/IAccessControl.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 /**
  * @dev External interface of AccessControl declared to support ERC165 detection.
@@ -339,7 +339,7 @@ interface IAccessControl {
 
 // OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 /**
  * @dev Provides information about the current execution context, including the
@@ -366,7 +366,7 @@ abstract contract Context {
 
 // OpenZeppelin Contracts (last updated v4.6.0) (token/ERC20/ERC20.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 
 
@@ -751,7 +751,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC20/extensions/ERC20Capped.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 
 /**
@@ -790,7 +790,7 @@ abstract contract ERC20Capped is ERC20 {
 
 // OpenZeppelin Contracts (last updated v4.6.0) (access/AccessControl.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 
 
@@ -1027,7 +1027,7 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
 
 // OpenZeppelin Contracts v4.4.1 (access/Ownable.sol)
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 
 /**
@@ -1112,7 +1112,7 @@ pragma solidity >=0.8.0 <0.9.0;
 contract Hermes is
 Ownable,
 ERC20("Hermes", "HRMS"),
-ERC20Capped(30000000 gwei),
+ERC20Capped(30_000_000 gwei),
 AccessControl
 {
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
