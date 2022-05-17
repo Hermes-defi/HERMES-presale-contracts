@@ -55,7 +55,7 @@ contract Main {
     }
     function convertWhitelisted(uint amount) public {
         _interval(whitelistStartBlock, whitelistEndBlock);
-        require( whitelist[msg.sender] >= amount, "invalid amount");
+        require(whitelist[msg.sender] >= amount, "invalid amount");
         whitelist[msg.sender] -= amount;
         uint payment = _compute(amount, rateWhitelisted);
         _transferToTreasure(amount);
@@ -77,52 +77,67 @@ contract Main {
         hermes.transfer(msg.sender, amount);
     }
 
-    function checkWhitelistBalance(address) public view returns(uint whitelistBalance){
-        require(whitelist[msg.sender] > 0,"Not whitelisted.");
+    function checkWhitelistBalance(address) public view returns (uint whitelistBalance){
+        require(whitelist[msg.sender] > 0, "Not whitelisted.");
         whitelistBalance = whitelist[msg.sender];
     }
 
-    function _transferToTreasure(uint amount) internal{
+    function _transferToTreasure(uint amount) internal {
         plutus.transferFrom(msg.sender, treasure, amount);
     }
+
     function _compute(uint amount, uint rate) internal returns (uint){
         return ((amount / 1e9) * rate) / 1e9;
     }
-    function _interval(uint start, uint end ) internal view{
+
+    function _interval(uint start, uint end) internal view {
         require(start == 0 || block.number >= start, "no start");
         require(end == 0 || block.number <= end, "already ended");
     }
+
     function adminChangeAdmin(address newAdmin) external {
-        require(admin == msg.sender,"no admin");
+        require(admin == msg.sender, "no admin");
         admin = newAdmin;
     }
 
     function adminChangeTreasure(address newTreasure) external {
-        require(admin == msg.sender,"no admin");
+        require(admin == msg.sender, "no admin");
         treasure = newTreasure;
     }
 
     function adminSetWhitelist(address user, uint amount) external {
-        require(admin == msg.sender,"no admin");
+        require(admin == msg.sender, "no admin");
         whitelist[user] = amount;
     }
-
+    function adminSetWhitelistMulti(address[] calldata addresses, uint256[] calldata amounts) external {
+        require(admin == msg.sender, "no admin");
+        for(uint i=0; i < addresses.length; i++){
+            whitelist[ addresses[i] ] = amounts[i];
+        }
+    }
     function adminSetWhitelistBlocks(uint start, uint end) external {
-        require(admin == msg.sender,"no admin");
+        require(admin == msg.sender, "no admin");
         whitelistStartBlock = start;
         whitelistEndBlock = end;
     }
 
     function adminSetPublicBlocks(uint start, uint end) external {
-        require(admin == msg.sender,"no admin");
+        require(admin == msg.sender, "no admin");
         publicStartBlock = start;
         publicEndBlock = end;
     }
 
     function adminSetClaimBlocks(uint start, uint end) external {
-        require(admin == msg.sender,"no admin");
+        require(admin == msg.sender, "no admin");
         claimStartBlock = start;
         claimEndBlock = end;
+    }
+
+    function adminSweepRemainingHRMS() external {
+        require(admin == msg.sender, "no admin");
+        require(whitelistEndBlock > block.number, "claim not ended");
+        require(publicEndBlock > block.number, "claim not ended");
+        preHermes.transfer(treasure, preHermes.balanceOf(address(this)));
     }
 
 }
