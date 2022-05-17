@@ -1277,7 +1277,7 @@ import "./libs/IERC20.sol";
 import "./interfaces/IUniswapV2Router02.sol";
 import "./interfaces/IBank.sol";
 */
-contract Plutus is ERC20("Plutus", "PLTS"), Ownable {
+contract Plutus is ERC20("tPlutus", "tPLTS"), Ownable {
     // Transfer tax rate in basis points. (default 5%)
     uint16 public transferTaxRate = 300;
     // Burn rate % of transfer tax. (default 20% x 5% = 1% of total amount).

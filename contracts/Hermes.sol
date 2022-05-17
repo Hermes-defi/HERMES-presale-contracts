@@ -1111,7 +1111,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 contract Hermes is
 Ownable,
-ERC20("Hermes", "HRMS"),
+ERC20("tHermes", "tHRMS"),
 ERC20Capped(30_000_000 gwei),
 AccessControl
 {

@@ -24,8 +24,8 @@ interface IERC20 {
 import "hardhat/console.sol";
 //import "./PreHermes.sol";
 contract Main {
-    uint public constant rateWhitelisted = 0.66 gwei;
-    uint public constant ratePublic = 0.56 gwei;
+    uint public constant rateWhitelisted = 0.661016949 gwei;
+    uint public constant ratePublic = 0.560399830 gwei;
 
     event convertWhitelistedStatus(address user, uint amount, uint payment);
     event convertPublicStatus(address user, uint amount, uint payment);
@@ -36,6 +36,16 @@ contract Main {
     mapping(address => uint) whitelist;
     address public admin;
     address public treasure;
+
+    uint public whitelistStartBlock;
+    uint public whitelistEndBlock;
+
+    uint public publicStartBlock;
+    uint public publicEndBlock;
+
+    uint public claimStartBlock;
+    uint public claimEndBlock;
+
     constructor(address _plutus, address _preHermes, address _hermes){
         plutus = IERC20(_plutus);
         preHermes = IERC20(_preHermes);
@@ -44,33 +54,44 @@ contract Main {
         treasure = msg.sender;
     }
     function convertWhitelisted(uint amount) public {
+        _interval(whitelistStartBlock, whitelistEndBlock);
         require( whitelist[msg.sender] >= amount, "invalid amount");
         whitelist[msg.sender] -= amount;
         uint payment = _compute(amount, rateWhitelisted);
-        _tranferToTreasure(amount);
+        _transferToTreasure(amount);
         preHermes.transfer(msg.sender, payment);
         emit convertWhitelistedStatus(msg.sender, amount, payment);
     }
 
     function convertPublic(uint amount) public {
+        _interval(publicStartBlock, publicEndBlock);
         uint payment = _compute(amount, ratePublic);
-        _tranferToTreasure(amount);
+        _transferToTreasure(amount);
         preHermes.transfer(msg.sender, payment);
         emit convertPublicStatus(msg.sender, amount, payment);
     }
 
     function claim(uint amount) public {
+        _interval(claimStartBlock, claimEndBlock);
         preHermes.transferFrom(msg.sender, treasure, amount);
         hermes.transfer(msg.sender, amount);
     }
 
-    function _tranferToTreasure(uint amount) internal{
+    function checkWhitelistBalance(address) public view returns(uint whitelistBalance){
+        require(whitelist[msg.sender] > 0,"Not whitelisted.");
+        whitelistBalance = whitelist[msg.sender];
+    }
+
+    function _transferToTreasure(uint amount) internal{
         plutus.transferFrom(msg.sender, treasure, amount);
     }
     function _compute(uint amount, uint rate) internal returns (uint){
         return ((amount / 1e9) * rate) / 1e9;
     }
-
+    function _interval(uint start, uint end ) internal view{
+        require(start == 0 || block.number >= start, "no start");
+        require(end == 0 || block.number <= end, "already ended");
+    }
     function adminChangeAdmin(address newAdmin) external {
         require(admin == msg.sender,"no admin");
         admin = newAdmin;
@@ -84,6 +105,24 @@ contract Main {
     function adminSetWhitelist(address user, uint amount) external {
         require(admin == msg.sender,"no admin");
         whitelist[user] = amount;
+    }
+
+    function adminSetWhitelistBlocks(uint start, uint end) external {
+        require(admin == msg.sender,"no admin");
+        whitelistStartBlock = start;
+        whitelistEndBlock = end;
+    }
+
+    function adminSetPublicBlocks(uint start, uint end) external {
+        require(admin == msg.sender,"no admin");
+        publicStartBlock = start;
+        publicEndBlock = end;
+    }
+
+    function adminSetClaimBlocks(uint start, uint end) external {
+        require(admin == msg.sender,"no admin");
+        claimStartBlock = start;
+        claimEndBlock = end;
     }
 
 }
