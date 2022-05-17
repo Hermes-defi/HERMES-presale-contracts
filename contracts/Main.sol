@@ -21,7 +21,7 @@ interface IERC20 {
     ) external returns (bool);
 }
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 //import "./PreHermes.sol";
 contract Main {
     uint public constant rateWhitelisted = 0.661016949 gwei;
@@ -77,9 +77,8 @@ contract Main {
         hermes.transfer(msg.sender, amount);
     }
 
-    function checkWhitelistBalance(address) public view returns (uint whitelistBalance){
-        require(whitelist[msg.sender] > 0, "Not whitelisted.");
-        whitelistBalance = whitelist[msg.sender];
+    function checkWhitelistBalance(address user) public view returns (uint whitelistBalance){
+        whitelistBalance = whitelist[user];
     }
 
     function _transferToTreasure(uint amount) internal {
