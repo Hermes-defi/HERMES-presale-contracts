@@ -46,13 +46,13 @@ contract Main {
     uint public claimStartBlock;
     uint public claimEndBlock;
 
-    constructor(address _plutus, address _preHermes, address _hermes){
+    constructor(address _plutus, address _preHermes){
         plutus = IERC20(_plutus);
         preHermes = IERC20(_preHermes);
-        hermes = IERC20(_hermes);
         admin = msg.sender;
         treasure = msg.sender;
     }
+
     function convertWhitelisted(uint amount) public {
         _interval(whitelistStartBlock, whitelistEndBlock);
         require(whitelist[msg.sender] >= amount, "invalid amount");
@@ -73,7 +73,7 @@ contract Main {
 
     function claim(uint amount) public {
         _interval(claimStartBlock, claimEndBlock);
-        preHermes.transferFrom(msg.sender, treasure, amount);
+        preHermes.transferFrom(msg.sender, address(0x000000000000000000000000000000000000dEaD), amount);
         hermes.transfer(msg.sender, amount);
     }
 
@@ -139,4 +139,8 @@ contract Main {
         preHermes.transfer(treasure, preHermes.balanceOf(address(this)));
     }
 
+    function adminSetHrmsToken(address _hermes) external {
+        require(admin == msg.sender, "no admin");
+        hermes = IERC20(_hermes);
+    }
 }
